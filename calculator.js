@@ -885,8 +885,14 @@
    * additions stop years, and projects wealth to age 70 with cost-of-delay analytics.
    */
   function calculateYoungsterWealth(options = {}) {
-    const currentAge = Math.max(10, Math.min(65, parseInt(options.currentAge, 10) || 21));
-    const targetAge = Math.max(currentAge + 1, Math.min(90, parseInt(options.targetAge, 10) || 70));
+    const currentAge = Math.max(10, Math.min(99, parseInt(options.currentAge, 10) || 21));
+    // Checkpoint ages (e.g. 50, 60, 70): the projection runs to the last one unless targetAge is given
+    const checkpointAges = (Array.isArray(options.checkpointAges) && options.checkpointAges.length
+      ? options.checkpointAges : [50, 60, 70]).map(a => parseInt(a, 10)).filter(a => !isNaN(a));
+    const lastCheckpoint = checkpointAges.length ? Math.max.apply(null, checkpointAges) : 70;
+    const targetAge = Math.max(currentAge + 1, Math.min(100, parseInt(options.targetAge, 10) || lastCheckpoint));
+    // Lump sum invested today (split core / satellite like the SIP)
+    const lump = options.lump !== undefined && !isNaN(parseFloat(options.lump)) ? Math.max(0, parseFloat(options.lump)) : 0;
     const monthly = options.monthly !== undefined && !isNaN(parseFloat(options.monthly)) ? Math.max(0, parseFloat(options.monthly)) : 10000;
     const stepUpEnabled = options.stepUpEnabled !== false;
     const stepUpPct = stepUpEnabled ? (options.stepUpPct !== undefined && !isNaN(parseFloat(options.stepUpPct)) ? parseFloat(options.stepUpPct) / 100.0 : 0.10) : 0.0;
@@ -906,9 +912,9 @@
     const satRate = hasSplit ? parseFloat(options.satRate) / 100.0 : rate;
     const computeDelays = options.computeDelays !== false;
 
-    let corpus = 0.0;
-    let corePot = 0.0, satPot = 0.0;
-    let totalInvested = 0.0;
+    let corePot = lump * coreW, satPot = lump - lump * coreW;
+    let corpus = corePot + satPot;
+    let totalInvested = lump;
     const yearlyRows = [];
 
     for (let yr = 1; yr <= horizon; yr++) {
@@ -965,6 +971,14 @@
     const investedAt70 = row70 ? row70.totalInvested : totalInvested;
     const multipleAt70 = investedAt70 > 0 ? corpusAt70 / investedAt70 : 0;
 
+    // Values at each checkpoint age (null when the age is not after the starting age)
+    const checkpointAt = (rows, age) => {
+      const r = rows.find(x => x.age === age);
+      return r ? { age: age, corpus: r.corpus, invested: r.totalInvested, multiple: r.totalInvested > 0 ? r.corpus / r.totalInvested : 0 }
+        : { age: age, corpus: null, invested: null, multiple: 0 };
+    };
+    const checkpoints = checkpointAges.map(a => checkpointAt(yearlyRows, a));
+
     // Cost of Delay Analysis: ONLY compute at top-level (prevent recursive explosion)
     let delayScenarios = [];
     if (computeDelays) {
@@ -983,6 +997,8 @@
             additionsStopYears: additionsStopYears,
             additionsStopMonths: additionsStopMonths,
             delayYearsList: delayYearsList,
+            lump: lump,
+            checkpointAges: checkpointAges,
             rate: rate * 100,
             coreRate: hasSplit ? coreRate * 100 : undefined,
             satRate: hasSplit ? satRate * 100 : undefined,
@@ -1002,6 +1018,7 @@
             corpusAt50: row50d ? row50d.corpus : null,
             corpusAt60: row60d ? row60d.corpus : null,
             corpusAt70: row70d ? row70d.corpus : delayedRes.corpus,
+            checkpoints: delayedRes.checkpoints,
             totalInvested: delayedRes.totalInvested,
             wealthLost: wealthLost,
             pctLost: pctLost,
@@ -1023,6 +1040,9 @@
       additionsStopYears: additionsStopYears,
       additionsStopMonths: additionsStopMonths,
       rate: rate,
+      lump: lump,
+      checkpointAges: checkpointAges,
+      checkpoints: checkpoints,
       totalInvested: totalInvested,
       corpus: corpus,
       corpusAt50: corpusAt50,

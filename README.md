@@ -1,6 +1,6 @@
 # Compounding Calculator
 
-**Core + Satellite wealth engine · v1.11 · Developed by Sathiya Sekhar E**
+**Core + Satellite wealth engine · v1.12 · Developed by Sathiya Sekhar E**
 
 A planning tool for long-term equity investors. It shows how a portfolio split into a steady **core** and a faster-growing **satellite** compounds over time, how much of the final money comes from compounding rather than from what you put in, and what it takes to reach a goal.
 
@@ -19,7 +19,7 @@ No sign-in, no install, no server. Everything runs in your browser.
 | **Core engine** | If I invest this lump sum and this monthly SIP, split this way, what will I have in *n* years? |
 | **Goal & schedule** | When does my plan reach my goal? What SIP, or what return, gets there on time? What does every year look like? |
 | **Annual review** | I have real results for the years so far. Am I still on track, and what must change from here? |
-| **Youngster lab** | What is starting at 21 worth compared with starting at 24, 27 or 30? |
+| **Youngster lab** | What is starting early worth? Wealth at any three ages from a lump sum, a SIP or both, and the cost of waiting. |
 
 ### Features
 
@@ -31,7 +31,8 @@ No sign-in, no install, no server. Everything runs in your browser.
 - **Goal solver.** The year the goal is reached, the SIP needed on time, and the CAGR needed with today's SIP, plus a table of what different CAGRs do.
 - **Doubling ladder and schedule.** A doubling ladder and a 60-year year-by-year schedule, with CSV download and copy.
 - **Users with IDs and goals.** Each user's year-end records feed a revised projection and a course correction.
-- **Youngster lab.** Wealth at 50, 60 and 70, and the cost of waiting 3, 6 or 9 years.
+- **Youngster lab.** Wealth at any three ages (up to 100) from a lump sum, a monthly SIP or both, and the cost of waiting 3, 5 or 10 years at a time.
+- **Presets for talks.** 19 ready-made demonstrations in four groups (10× in 10 years, Youngster lab, the family math, more from the slides). One click sets the inputs and opens the page, with a presenter note and Previous / Next.
 - **Built-in Help.** Press **Help** or **F1** to open the user manual at the page you are on. The design manual is also included.
 - **Look and Reset.** Dark and light themes, a one-page or full PDF report, and **Reset page** with Undo on every page.
 
@@ -128,4 +129,4 @@ Projections, not promises. Every result assumes the same return every year, and 
 
 ---
 
-Compounding Calculator v1.11 · 24 Oct 2026 · Developed by **Sathiya Sekhar E**
+Compounding Calculator v1.12 · 29 Oct 2026 · Developed by **Sathiya Sekhar E**

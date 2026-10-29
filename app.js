@@ -125,6 +125,10 @@ document.addEventListener('DOMContentLoaded', function () {
     dispYoungsterAge: document.getElementById('disp-youngster-age'),
     dispYoungsterHorizon: document.getElementById('disp-youngster-horizon'),
     inpYoungsterMonthly: document.getElementById('inp-youngster-monthly'),
+    inpYoungsterLump: document.getElementById('inp-youngster-lump'),
+    inpYoungsterAge1: document.getElementById('inp-youngster-age-1'),
+    inpYoungsterAge2: document.getElementById('inp-youngster-age-2'),
+    inpYoungsterAge3: document.getElementById('inp-youngster-age-3'),
     inpYoungsterStepUpEnable: document.getElementById('inp-youngster-stepup-enable'),
     inpYoungsterStepUpPct: document.getElementById('inp-youngster-stepup-pct'),
     dispYoungsterStepUp: document.getElementById('disp-youngster-stepup'),
@@ -281,11 +285,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.11',
-    date: '2026-10-24',
+    version: '1.12',
+    date: '2026-10-29',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.12', date: '2026-10-29', notes: [
+        'Presets menu: 19 ready-made demonstrations in four groups (10× in 10 years, Youngster lab, the family math, more from the slides), with a presenter note and Previous / Next',
+        'While a preset is shown, the plan pages leave the user’s year-end records out',
+        'Youngster lab: lump sum today, any three ages to show (up to 100), waiting steps of 3, 5 or 10 years',
+        'CAGR table rates now 12, 15, 18, 20, 23, 26 and 30%',
+        'Fixes: waiting cards no longer widen the page on phones'
+      ] },
       { version: '1.11', date: '2026-10-24', notes: [
         'Help button: the User manual and the Design manual open inside the calculator, at the page you are on',
         'Manuals also supplied as PDF files',
@@ -311,6 +322,9 @@ document.addEventListener('DOMContentLoaded', function () {
       `<li><span class="ver">v${h.version}</span><strong>${fmtAppDate(h.date)}</strong><ul style="margin:6px 0 0 18px">${h.notes.map(n => `<li style="background:none;border:0;padding:1px 0">${escapeHtml(n)}</li>`).join('')}</ul></li>`).join('');
     document.title = `Compounding Calculator v${APP_INFO.version}`;
   }
+
+  /** Year-end records used by the plan pages; left out while a preset is shown. */
+  function planActuals() { return state.presetId ? {} : (state.actualsHistory || {}); }
 
   function bindClick(id, fn) { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); }
 
@@ -448,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
     els.spouseContainer.classList.toggle('is-off', !params.spouseInclude);
 
     // 2. Main schedule (with any logged actual years)
-    const result = CE.calculateSchedule(params, state.actualsHistory);
+    const result = CE.calculateSchedule(params, planActuals());
     state.lastResult = result;
     const hasMoney = result.totalInvested > 0;
 
@@ -474,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (gapNote) {
       const d = (result.portfolioIRR - result.weightedStartingReturn) * 100;
       const satFinal = result.totalCorpus > 0 ? (result.satCorpus / result.totalCorpus) * 100 : 0;
-      const hasActuals = Object.keys(state.actualsHistory || {}).length > 0;
+      const hasActuals = Object.keys(planActuals()).length > 0;
       gapNote.textContent = !hasMoney ? 'Blended CAGR is the mix-weighted return of core and satellite.'
         : Math.abs(d) < 0.1 ? 'IRR matches the blended CAGR — your money compounds at the planned rate.'
         : d > 0 ? `IRR is ${d.toFixed(2)} pts above the CAGR: the faster satellite grows from ${Math.round(params.satAlloc * 100)}% to ${satFinal.toFixed(0)}% of the money.`
@@ -529,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const spouseSip = params.spouseInclude
         ? `${inr(params.spouseLump)} lump; ${inr(params.spouseMonthly)}/mo, ${step(params.spouseStepUpMode, params.spouseStepUp, params.spouseStepUpAmt, params.spouseStepUpStop)}, for ${params.spouseAddStop} yrs${params.spouseAddStopMonths ? ' ' + params.spouseAddStopMonths + ' mo' : ''}`
         : 'Not included';
-      const logged = Object.keys(state.actualsHistory).length;
+      const logged = Object.keys(planActuals()).length;
       els.printAssumptions.innerHTML = `
         <div>Mix: <strong>${Math.round(params.coreAlloc * 100)}% core / ${Math.round(params.satAlloc * 100)}% satellite</strong></div>
         <div>Returns: <strong>core ${pct(params.coreReturn)}, satellite ${pct(params.satReturn)}</strong></div>
@@ -915,7 +929,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // One table: what a different blended CAGR does to IRR, doubling, corpus, goal date and SIP
     if (els.goalSensTbody) {
-      const pts = new Set([0.12, 0.15, 0.18, 0.20, 0.22, 0.25, 0.28, 0.30].map(x => Math.round(x * 1000)));
+      const pts = new Set([0.12, 0.15, 0.18, 0.20, 0.23, 0.26, 0.30].map(x => Math.round(x * 1000)));
       pts.add(Math.round(planned * 1000));
       pts.add(Math.round(assumed * 1000));
       const today = params.selfInclude ? params.selfMonthly : 0;
@@ -924,7 +938,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const rows = Array.from(pts).sort((x, y) => x - y).map(k => {
         const r = k / 1000;
         const rates = CE.ratesForBlended(r, params);
-        const sched = CE.calculateSchedule(Object.assign({}, params, rates), state.actualsHistory);
+        const sched = CE.calculateSchedule(Object.assign({}, params, rates), planActuals());
         const reach = CE.yearReaching(sched.yearlyRows, target, 60);
         const res = CE.requiredSIPAtReturn(target, years, params, r);
         const isChosen = Math.abs(r - assumed) < 0.0006;
@@ -1029,8 +1043,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!els.inpYoungsterAge || !els.youngsterCards) return;
 
     const currentAge = intOr(els.inpYoungsterAge, 21);
-    const targetAge = 70;
+    // Ages to show (three checkpoints, up to 100); the projection runs to the last one
+    const ages = [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3]
+      .map((el, i) => Math.max(16, Math.min(100, intOr(el, [50, 60, 70][i]))));
+    const checkAges = Array.from(new Set(ages)).sort((a, b) => a - b);
+    while (checkAges.length < 3) checkAges.unshift(Math.max(16, checkAges[0] - 10));
+    const targetAge = Math.max(currentAge + 1, checkAges[checkAges.length - 1]);
     const horizon = Math.max(1, targetAge - currentAge);
+    const lump = Math.max(0, numOr(els.inpYoungsterLump, 0));
+    const waitStep = state.youngWait || 3;
+    const delayList = [waitStep, waitStep * 2, waitStep * 3];
     syncYearSlider(els.inpYoungsterStepUpStop, horizon);
     syncYearSlider(els.inpYoungsterAddStop, horizon);
 
@@ -1053,6 +1075,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (els.dispYoungsterAge) els.dispYoungsterAge.textContent = `${currentAge} yrs`;
     if (els.dispYoungsterHorizon) els.dispYoungsterHorizon.textContent = `${horizon} years`;
+    const setT = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    setT('disp-youngster-horizon-to', `to ${targetAge}`);
+    setT('disp-timeline-end-age', targetAge);
+    [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3].forEach(el => {
+      if (el) el.classList.toggle('is-invalid', intOr(el, 0) <= currentAge);
+    });
     if (els.dispYoungsterStepUp) els.dispYoungsterStepUp.textContent = fmtPct(stepUpPct / 100);
     const stepGroup = document.querySelector('.stepup-group[data-who="youngster"]');
     if (stepGroup) stepGroup.classList.toggle('is-disabled', !stepUpEnabled);
@@ -1080,21 +1108,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (els.helpYoungsterStepUpStop) {
       els.helpYoungsterStepUpStop.textContent = !stepUpEnabled ? 'Step-up is off'
-        : (stepUpStopYears >= horizon ? 'Keeps rising every year to 70' : `Rises until year ${stopRaw} (the age-${currentAge + stopRaw} row), then stays flat`);
+        : (stepUpStopYears >= horizon ? `Keeps rising every year to ${targetAge}` : `Rises until year ${stopRaw} (the age-${currentAge + stopRaw} row), then stays flat`);
     }
     if (els.dispYoungsterAddStop) {
-      els.dispYoungsterAddStop.textContent = additionsStopYears >= horizon ? 'Until 70' : yrs(addRaw) + (addMonths ? ` ${addMonths} mo` : '');
+      els.dispYoungsterAddStop.textContent = additionsStopYears >= horizon ? `Until ${targetAge}` : yrs(addRaw) + (addMonths ? ` ${addMonths} mo` : '');
     }
     if (els.helpYoungsterAddStop) {
-      els.helpYoungsterAddStop.textContent = additionsStopYears >= horizon ? 'Investing every year to 70'
-        : `SIPs end after ${yrs(addRaw)}${addMonths ? ' ' + addMonths + ' months' : ''} (age ${currentAge + addRaw}); the corpus keeps compounding to 70`;
+      els.helpYoungsterAddStop.textContent = monthly <= 0 ? 'No monthly SIP set'
+        : additionsStopYears >= horizon ? `Investing every year to ${targetAge}`
+        : `SIPs end after ${yrs(addRaw)}${addMonths ? ' ' + addMonths + ' months' : ''} (age ${currentAge + addRaw}); the corpus keeps compounding to ${targetAge}`;
     }
 
     const result = CE.calculateYoungsterWealth({
       currentAge, targetAge, monthly, stepUpEnabled, stepUpPct, stepUpMode, stepUpAmt,
       stepUpStopYears, additionsStopYears, additionsStopMonths: addMonths, rate,
       coreRate: yCore, satRate: ySat, coreAlloc: yAlloc,
-      delayYearsList: [3, 6, 9]
+      lump, checkpointAges: checkAges,
+      delayYearsList: delayList
     });
     const cr = (v, d = 2) => CE.formatINR(v, { compact: true, decimals: d });
 
@@ -1110,16 +1140,21 @@ document.addEventListener('DOMContentLoaded', function () {
         if (multEl) multEl.textContent = '';
       }
     };
-    setAge(els.ykpiCorpus50, els.ykpiCorpus50Exact, els.ykpiMult50, result.corpusAt50, result.multipleAt50, 'You start after 50');
-    setAge(els.ykpiCorpus60, els.ykpiCorpus60Exact, els.ykpiMult60, result.corpusAt60, result.multipleAt60, 'You start after 60');
-    setAge(els.ykpiCorpus, els.ykpiCorpusExact, els.ykpiMult70, result.corpusAt70, result.multipleAt70, '');
+    const cps = result.checkpoints;
+    const ageTitle = (cp) => `At age ${cp.age}` + (cp.age > currentAge ? ` · in ${cp.age - currentAge} yrs` : '');
+    setT('ykpi-title-1', ageTitle(cps[0])); setT('ykpi-title-2', ageTitle(cps[1])); setT('ykpi-title-3', ageTitle(cps[2]));
+    setAge(els.ykpiCorpus50, els.ykpiCorpus50Exact, els.ykpiMult50, cps[0].corpus, cps[0].multiple, 'Not after the starting age');
+    setAge(els.ykpiCorpus60, els.ykpiCorpus60Exact, els.ykpiMult60, cps[1].corpus, cps[1].multiple, 'Not after the starting age');
+    setAge(els.ykpiCorpus, els.ykpiCorpusExact, els.ykpiMult70, cps[2].corpus, cps[2].multiple, 'Not after the starting age');
 
     if (els.ykpiInvested) els.ykpiInvested.textContent = cr(result.totalInvested);
     if (els.ykpiInvestedSub) {
       const activeYears = Math.min(horizon, additionsStopYears);
-      els.ykpiInvestedSub.textContent = activeYears >= horizon
-        ? `Over ${horizon} years, age ${currentAge} to 70`
-        : `For ${activeYears} yrs${addMonths ? ' ' + addMonths + ' mo' : ''}, age ${currentAge} to ${currentAge + activeYears}`;
+      const sipTxt = monthly <= 0 ? '' : activeYears >= horizon
+        ? `SIPs over ${horizon} years, age ${currentAge} to ${targetAge}`
+        : `SIPs for ${activeYears} yrs${addMonths ? ' ' + addMonths + ' mo' : ''}, age ${currentAge} to ${currentAge + activeYears}`;
+      const lumpTxt = lump > 0 ? `${cr(lump)} today` : '';
+      els.ykpiInvestedSub.textContent = [lumpTxt, sipTxt].filter(Boolean).join(' + ') || 'Nothing invested yet';
     }
     if (els.ykpiGain) els.ykpiGain.textContent = cr(result.wealthGain);
     if (els.ykpiGainShare) {
@@ -1127,16 +1162,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (els.ykpiMultiple) els.ykpiMultiple.textContent = result.totalInvested > 0 ? `${result.multiple.toFixed(0)}× invested` : '—';
 
-    const delay5 = result.delayScenarios.find(s => s.delayYears === 3);
+    const delay5 = result.delayScenarios.find(s => s.delayYears === waitStep);
+    setT('ykpi-delay-title', `Cost of waiting ${waitStep} years`);
     if (els.ykpiDelay5) {
       if (delay5) {
         els.ykpiDelay5.textContent = `−${delay5.pctLost.toFixed(1)}%`;
-        if (els.ykpiDelay5Loss) els.ykpiDelay5Loss.textContent = `${cr(delay5.wealthLost, 1)} less at 70`;
+        if (els.ykpiDelay5Loss) els.ykpiDelay5Loss.textContent = `${cr(delay5.wealthLost, 1)} less at ${targetAge}`;
       } else {
         els.ykpiDelay5.textContent = 'n/a';
-        if (els.ykpiDelay5Loss) els.ykpiDelay5Loss.textContent = 'Too close to 70';
+        if (els.ykpiDelay5Loss) els.ykpiDelay5Loss.textContent = `Too close to ${targetAge}`;
       }
     }
+    const delayNote = document.getElementById('young-delay-note');
+    if (delayNote) {
+      delayNote.innerHTML = `Same ${lump > 0 ? 'lump sum, ' : ''}monthly amount and step-up, started ${delayList[0]}, ${delayList[1]} or ${delayList[2]} years later. Loss is measured at age ${targetAge} against starting today at <strong>age ${currentAge}</strong>.`;
+    }
+    document.querySelectorAll('.wait-toggle .seg-btn').forEach(b => {
+      const on = parseInt(b.getAttribute('data-wait'), 10) === waitStep;
+      b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
 
     // How fast money doubles — FD, Nifty and your Core+SAT mix from this tab's selections.
     // Core and satellite grow as separate pots (as in the Core engine), so the mix is valued pot by pot.
@@ -1164,23 +1208,24 @@ document.addEventListener('DOMContentLoaded', function () {
       const noteEl = document.getElementById('young-doubling-note');
       if (noteEl) {
         noteEl.innerHTML = mixDbl
-          ? `Core+SAT = ${yAlloc}% core at ${yCore.toFixed(1)}% and ${100 - yAlloc}% satellite at ${ySat.toFixed(1)}% (blend ${rate.toFixed(1)}%). It first doubles in ${mixDbl.toFixed(2)} years, and a lump sum doubles about ${Math.log2(mixGrowth(horizon)).toFixed(1)} times between age ${currentAge} and 70.`
+          ? `Core+SAT = ${yAlloc}% core at ${yCore.toFixed(1)}% and ${100 - yAlloc}% satellite at ${ySat.toFixed(1)}% (blend ${rate.toFixed(1)}%). It first doubles in ${mixDbl.toFixed(2)} years, and a lump sum doubles about ${Math.log2(mixGrowth(horizon)).toFixed(1)} times between age ${currentAge} and ${targetAge}.`
           : 'Choose returns above zero.';
       }
     }
 
     // Cost of delay cards
-    const ageRows = (a50, a60) => `
+    const cpVal = (list, i) => (list && list[i] && list[i].corpus !== null && list[i].corpus !== undefined) ? cr(list[i].corpus) : '—';
+    const ageRows = (list) => `
       <div class="yc-rows">
-        <div class="yc-row"><span>At 50</span><strong>${a50 !== null ? cr(a50) : '—'}</strong></div>
-        <div class="yc-row"><span>At 60</span><strong>${a60 !== null ? cr(a60) : '—'}</strong></div>
+        <div class="yc-row"><span>At ${checkAges[0]}</span><strong>${cpVal(list, 0)}</strong></div>
+        <div class="yc-row"><span>At ${checkAges[1]}</span><strong>${cpVal(list, 1)}</strong></div>
       </div>`;
 
     let cardsHtml = `
       <div class="youngster-card baseline">
         <div class="yc-head"><span class="yc-title">Start today, age ${result.currentAge}</span><span class="badge badge-win">Best</span></div>
-        ${ageRows(result.corpusAt50, result.corpusAt60)}
-        <div class="yc-final"><span>At 70</span><strong class="val-growth">${cr(result.corpus)}</strong></div>
+        ${ageRows(result.checkpoints)}
+        <div class="yc-final"><span>At ${targetAge}</span><strong class="val-growth">${cr(result.corpus)}</strong></div>
         <div class="yc-loss-bar yc-keep-bar"><i style="width:100%"></i></div>
         <div class="yc-foot">Invested ${cr(result.totalInvested)} · ${result.multiple.toFixed(0)}× back</div>
       </div>`;
@@ -1190,8 +1235,8 @@ document.addEventListener('DOMContentLoaded', function () {
       cardsHtml += `
         <div class="youngster-card delayed">
           <div class="yc-head"><span class="yc-title">Wait ${d.delayYears} yr${d.delayYears > 1 ? 's' : ''}, age ${d.startAge}</span><span class="badge badge-loss">−${d.pctLost.toFixed(0)}%</span></div>
-          ${ageRows(d.corpusAt50, d.corpusAt60)}
-          <div class="yc-final"><span>At 70</span><strong>${cr(d.corpus)}</strong></div>
+          ${ageRows(d.checkpoints)}
+          <div class="yc-final"><span>At ${targetAge}</span><strong>${cr(d.corpus)}</strong></div>
           <div class="yc-loss-bar" title="${keep.toFixed(0)}% of the start-today corpus"><i style="width:${keep}%; background: var(--text-muted)"></i></div>
           <div class="yc-foot"><span class="val-rose">${cr(d.wealthLost, 1)} less</span> · invested ${cr(d.totalInvested)}</div>
         </div>`;
@@ -1200,9 +1245,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Timeline table
     if (els.youngsterTimelineTbody && result.yearlyRows) {
-      const tag = { 50: 'badge-self', 60: 'badge-gold', [targetAge]: 'badge-win' };
+      const tag = { [checkAges[0]]: 'badge-self', [checkAges[1]]: 'badge-gold', [targetAge]: 'badge-win' };
       els.youngsterTimelineTbody.innerHTML = result.yearlyRows.map(r => {
-        const special = r.age === 50 || r.age === 60 || r.age === targetAge;
+        const special = checkAges.includes(r.age) || r.age === targetAge;
         const rowClass = special ? 'row-horizon' : (r.age % 5 === 0 ? 'milestone-row' : '');
         const mult = r.totalInvested > 0 ? (r.corpus / r.totalInvested).toFixed(1) : '0.0';
         const badge = special ? ` <span class="badge ${tag[r.age] || 'badge-gold'} age-tag">Age ${r.age}</span>` : '';
@@ -1621,6 +1666,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputs = [
       els.inpYoungsterAge,
       els.inpYoungsterMonthly,
+      els.inpYoungsterLump,
+      els.inpYoungsterAge1,
+      els.inpYoungsterAge2,
+      els.inpYoungsterAge3,
       els.inpYoungsterStepUpEnable,
       els.inpYoungsterStepUpPct,
       els.inpYoungsterStepUpStop,
@@ -1675,6 +1724,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
     }
+
+    // Lump sum chips
+    const syncLumpChips = () => {
+      const v = numOr(els.inpYoungsterLump, 0);
+      document.querySelectorAll('.quick-young-lump-chips .chip-action').forEach(c => c.classList.toggle('active', parseFloat(c.getAttribute('data-val')) === v));
+    };
+    document.querySelectorAll('.quick-young-lump-chips .chip-action').forEach(chip => {
+      chip.addEventListener('click', function () {
+        if (!els.inpYoungsterLump) return;
+        els.inpYoungsterLump.value = this.getAttribute('data-val');
+        syncLumpChips(); updateYoungsterLab();
+      });
+    });
+    if (els.inpYoungsterLump) els.inpYoungsterLump.addEventListener('input', syncLumpChips);
+
+    // Waiting steps: 3, 5 or 10 years
+    document.querySelectorAll('.wait-toggle .seg-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        state.youngWait = parseInt(this.getAttribute('data-wait'), 10) || 3;
+        updateYoungsterLab();
+      });
+    });
 
     // Step-up toggle switch
     if (els.inpYoungsterStepUpEnable) {
@@ -1838,10 +1909,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Reset page — restores the inputs of the page you are on, with Undo
   // Youngster lab starting values (also what Reset page restores)
-  const youngsterDefaults = { age: 21, monthly: 10000, enable: true, mode: 'pct', pct: 5, amt: 500, stop: 10, add: 10, addMonths: 0, alloc: 70, core: 17, sat: 27 };
+  const youngsterDefaults = { age: 21, lump: 0, monthly: 10000, enable: true, mode: 'pct', pct: 5, amt: 500, stop: 10, add: 10, addMonths: 0, alloc: 70, core: 17, sat: 27, ages: [50, 60, 70], wait: 3 };
   function readYoungsterInputs() {
     return {
       age: els.inpYoungsterAge.value, monthly: els.inpYoungsterMonthly.value,
+      lump: els.inpYoungsterLump ? els.inpYoungsterLump.value : 0,
+      ages: [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3].map(el => el ? el.value : ''),
+      wait: state.youngWait || 3,
       enable: els.inpYoungsterStepUpEnable.checked, mode: els.inpYoungsterStepUpMode.value,
       pct: els.inpYoungsterStepUpPct.value, amt: els.inpYoungsterStepUpAmt.value,
       stop: els.inpYoungsterStepUpStop.value, add: els.inpYoungsterAddStop.value,
@@ -1851,6 +1925,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function applyYoungsterInputs(v) {
     els.inpYoungsterAge.value = v.age;
+    const ages = v.ages || [50, 60, 70];
+    [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3].forEach((el, i) => { if (el) el.value = ages[i]; });
+    if (els.inpYoungsterLump) els.inpYoungsterLump.value = v.lump || 0;
+    document.querySelectorAll('.quick-young-lump-chips .chip-action').forEach(c => c.classList.toggle('active', parseFloat(c.getAttribute('data-val')) === parseFloat(v.lump || 0)));
+    state.youngWait = parseInt(v.wait, 10) || 3;
     updateYoungsterLab(); // resizes the year sliders for the age
     els.inpYoungsterMonthly.value = v.monthly;
     els.inpYoungsterStepUpEnable.checked = v.enable;
@@ -1879,6 +1958,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const u = activeUser();
     if (tab === 'tab-core') {
       const before = readInputsForProfile();
+      state.presetId = null; if (presetNote) presetNote.hidden = true;
       applyParamsToInputs(defaultPlanParams());
       updateAll();
       showToast('Core engine reset to the standard plan — press Save to keep it for this user', '↺',
@@ -1903,6 +1983,192 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   bindClick('btn-reset-page', resetPage);
+
+  // =========================================================================
+  // PRESETS — ready-made demonstrations for talks and slides
+  // Each preset sets the Core engine (core), the goal (goal) and/or the
+  // Youngster lab (young), then opens a page and shows a short talking point.
+  // While a preset is shown, the plan pages leave the user's year-end records out.
+  // =========================================================================
+  const corePreset = (o) => Object.assign(defaultPlanParams(), {
+    selfInclude: false, selfStepUpOn: false, selfMonthly: 10000, selfAddStop: 10, selfAddStopMonths: 0, selfStepUpStop: 10,
+    spouseInclude: false, spouseStepUpOn: false
+  }, o);
+  const youngPreset = (o) => Object.assign({}, youngsterDefaults, { lump: 0, enable: false, add: 999, stop: 10, alloc: 100, core: 18, sat: 25, ages: [50, 60, 70], wait: 3 }, o);
+  const familyModel = (name, c, s) => ({
+    id: 'family-' + name.toLowerCase(), title: `Model ${name} · core ${c}% / satellite ${s}%`,
+    sub: '₹1 Cr at 40 + ₹80,000 a month, 70 : 30, to 60', tab: 'tab-core',
+    core: corePreset({ coreAlloc: 70, coreRet: c, satRet: s, horizon: 20, selfLump: 10000000, selfInclude: true, selfMonthly: 80000, selfAddStop: 20, selfStepUpStop: 20 }),
+    note: `₹1 Cr at age 40 (₹70 L core, ₹30 L satellite) plus the ₹80,000 monthly surplus (₹56,000 core, ₹24,000 satellite) for 20 years, to age 60. Core ${c}%, satellite ${s}%. Compare the corpus, the IRR and how much of it the satellite makes.`
+  });
+
+  const PRESET_GROUPS = [
+    { title: 'One lakh, ten years', hint: 'Core engine · slide 11', items: [
+      { id: 'tenx', title: '10× in 10 years', sub: '₹1 L at 26%, all in core, no SIP', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 100, coreRet: 26, satRet: 33, horizon: 10, selfLump: 100000 }),
+        note: '₹1 lakh compounding at 26% a year. By the Rule of 72 it doubles about every 2.8 years, so it is near 10× by year 10. Hover over year 5 to see what selling halfway would leave behind.' },
+      { id: 'tenx-7030', title: 'Same, split 70 : 30', sub: 'Core 23% + satellite 33% = 26% blended', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000 }),
+        note: 'Same ₹1 lakh and the same 26% blended CAGR, split 70 : 30 with a 10-point gap. The satellite is never rebalanced, so it becomes a bigger share and the end value beats plain 26%. Compare the corpus and the Portfolio IRR with the previous preset.' },
+      { id: 'tenx-sip', title: '+ ₹10,000 monthly SIP', sub: '70 : 30, no step-up, for 10 years', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000, selfInclude: true }),
+        note: 'The same 70 : 30 portfolio with ₹10,000 added every month for 10 years and no step-up. Compare what was put in with what compounding added.' },
+      { id: 'tenx-spouse', title: '+ spouse investing too', sub: 'Spouse ₹1 L + ₹10,000 a month, no step-up', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000, selfInclude: true,
+          spouseInclude: true, spouseLump: 100000, spouseMonthly: 10000, spouseAddStop: 10, spouseStepUpStop: 10 }),
+        note: 'Both partners invest ₹1 lakh plus ₹10,000 a month. The strip under the chart compares self only with both of you, and how much sooner the same corpus is reached.' }
+    ] },
+    { title: 'Youngster lab', hint: 'Plain 18% vs 70 : 30', items: [
+      { id: 'y20', title: 'Age 20 · ₹10,000 a month · plain 18%', sub: 'All in core, no step-up, after 30, 40, 50 yrs', tab: 'tab-youngsters',
+        young: youngPreset({ age: 20, monthly: 10000 }),
+        note: '₹10,000 every month from age 20 to 70 at a plain 18%, no step-up. The cards show wealth after 30, 40 and 50 years.' },
+      { id: 'y20-7030', title: 'Same, split 70 : 30', sub: 'Core 15% + satellite 25% = 18% blended', tab: 'tab-youngsters',
+        young: youngPreset({ age: 20, monthly: 10000, alloc: 70, core: 15, sat: 25 }),
+        note: 'The same SIP and the same 18% blended CAGR, split 70 : 30. Without rebalancing the satellite takes over, so each card is well above the plain 18% figures.' },
+      { id: 'y20-step', title: 'Age 20 · 10% step-up, stop after 10 yrs · plain 18%', sub: 'SIP and step-up end after 10 years', tab: 'tab-youngsters',
+        young: youngPreset({ age: 20, monthly: 10000, enable: true, mode: 'pct', pct: 10, stop: 10, add: 10 }),
+        note: '₹10,000 a month rising 10% a year, invested for only 10 years, then left alone to compound to 70 at a plain 18%.' },
+      { id: 'y20-step-7030', title: 'Same, split 70 : 30', sub: 'Core 15% + satellite 25%', tab: 'tab-youngsters',
+        young: youngPreset({ age: 20, monthly: 10000, enable: true, mode: 'pct', pct: 10, stop: 10, add: 10, alloc: 70, core: 15, sat: 25 }),
+        note: 'Ten years of stepped-up SIPs, then hands off, now split 70 : 30 at the same 18% blended CAGR.' },
+      { id: 'y40', title: 'Age 40 · ₹25 L lump sum · plain 18%', sub: 'No SIP, after 30, 40, 50 yrs', tab: 'tab-youngsters',
+        young: youngPreset({ age: 40, lump: 2500000, monthly: 0, ages: [70, 80, 90] }),
+        note: '₹25 lakh invested once at 40 and never touched, at a plain 18%. The cards show it after 30, 40 and 50 years (ages 70, 80, 90): money that outlives the person who built it.' },
+      { id: 'y40-7030', title: 'Same, split 70 : 30', sub: 'Core 15% + satellite 25%', tab: 'tab-youngsters',
+        young: youngPreset({ age: 40, lump: 2500000, monthly: 0, ages: [70, 80, 90], alloc: 70, core: 15, sat: 25 }),
+        note: 'The same ₹25 lakh split 70 : 30 at the same 18% blended CAGR. Over 30 to 50 years the unrebalanced satellite makes the gap enormous.' }
+    ] },
+    { title: 'The family math', hint: 'Slide 12 · Models A to D', items: [
+      familyModel('A', 15, 20), familyModel('B', 18, 25), familyModel('C', 18, 30), familyModel('D', 20, 40)
+    ] },
+    { title: 'More from the slides', hint: 'Slides 11 and 13', items: [
+      { id: 'ten-lakh', title: '₹10 L at 18% for 30 years', sub: 'Compound vs linear · slide 11', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 30, selfLump: 1000000 }),
+        note: 'About 143× by year 30, against 6.4× at simple interest. The 25 / 50 / 75% markers show most of the money arriving in the last decade. Hover over years 10 and 20.' },
+      { id: 'rate-grid', title: 'What ₹10 L becomes at 12% to 26%', sub: 'CAGR table · slide 11', tab: 'tab-plan',
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 30, selfLump: 1000000 }),
+        goal: { target: 100000000, years: 30, assumedReturn: null },
+        note: 'The CAGR table shows what ₹10 lakh becomes by year 30 at each rate, and when it reaches ₹10 Cr. Change Horizon on the Core engine to 10 or 20 for the other columns of the slide.' },
+      { id: 'start-21', title: '₹10,000 a month from 21 · a 10-year delay', sub: 'Plain 18%, at 40, 50, 60 · slide 13', tab: 'tab-youngsters',
+        young: youngPreset({ age: 21, monthly: 10000, ages: [40, 50, 60], wait: 10 }),
+        note: '₹10,000 a month from 21 at 18%, checked at 40, 50 and 60. The first waiting card starts at 31 instead: compare the two at 60 to see what ten years of delay costs.' },
+      { id: 'leave-20', title: 'Stop at 50, leave it 20 more years', sub: '₹10,000 a month from 21 to 50 · slide 13', tab: 'tab-youngsters',
+        young: youngPreset({ age: 21, monthly: 10000, add: 29, ages: [50, 60, 70] }),
+        note: 'SIPs stop at 50. If the children leave the money alone for 20 more years, compare the wealth at 50 with the wealth at 70.' },
+      { id: 'ff-40', title: '₹25 L at 40 · when is ₹3 Cr reached?', sub: 'Freedom number · slide 13', tab: 'tab-plan',
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 20, selfLump: 2500000 }),
+        goal: { target: 30000000, years: 20, assumedReturn: null },
+        note: 'Freedom number ₹3 Cr (25 × ₹12 lakh a year). “When your current plan gets there” gives the year at 18%; add 40 for the age. The CAGR table shows 12%, 18% and 26% side by side, with the value at 60.' }
+    ] }
+  ];
+  const PRESET_LIST = [];
+  PRESET_GROUPS.forEach(g => g.items.forEach(it => { it.group = g.title; PRESET_LIST.push(it); }));
+
+  const presetBtn = document.getElementById('btn-presets');
+  const presetMenu = document.getElementById('preset-menu');
+  const presetNote = document.getElementById('preset-note');
+
+  function renderPresetMenu() {
+    if (!presetMenu) return;
+    let n = 0;
+    presetMenu.innerHTML = PRESET_GROUPS.map(g => `
+      <div class="preset-group" role="group" aria-label="${escapeHtml(g.title)}">
+        <div class="preset-group-head"><span>${escapeHtml(g.title)}</span><small>${escapeHtml(g.hint)}</small></div>
+        ${g.items.map(it => { n++; return `
+          <button type="button" class="preset-item${state.presetId === it.id ? ' is-active' : ''}" role="menuitem" data-preset="${it.id}">
+            <span class="preset-num">${n}</span>
+            <span class="preset-text"><strong>${escapeHtml(it.title)}</strong><small>${escapeHtml(it.sub)}</small></span>
+          </button>`; }).join('')}
+      </div>`).join('');
+  }
+
+  function openPresetMenu(open) {
+    if (!presetMenu || !presetBtn) return;
+    if (open) renderPresetMenu();
+    presetMenu.hidden = !open;
+    presetBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      const first = presetMenu.querySelector('.preset-item.is-active') || presetMenu.querySelector('.preset-item');
+      if (first) first.focus({ preventScroll: true });
+    }
+  }
+
+  function switchToTab(id) {
+    const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
+    if (btn && !btn.classList.contains('active')) btn.click();
+  }
+
+  function showPresetNote(p) {
+    if (!presetNote) return;
+    const i = PRESET_LIST.indexOf(p);
+    const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    set('preset-note-tag', `Preset ${i + 1} of ${PRESET_LIST.length} · ${p.group}`);
+    set('preset-note-title', p.title);
+    set('preset-note-desc', p.note);
+    presetNote.hidden = false;
+    const prev = document.getElementById('btn-preset-prev'), next = document.getElementById('btn-preset-next');
+    if (prev) prev.disabled = i <= 0;
+    if (next) next.disabled = i >= PRESET_LIST.length - 1;
+  }
+
+  function clearPreset() {
+    if (!state.presetId) return;
+    state.presetId = null;
+    if (presetNote) presetNote.hidden = true;
+    updateAll();
+  }
+
+  function applyPreset(id, withUndo = true) {
+    const p = PRESET_LIST.find(x => x.id === id);
+    if (!p) return;
+    const before = { core: readInputsForProfile(), plan: readPlanTabInputs(), young: readYoungsterInputs(), tab: state.activeTab || 'tab-core', preset: state.presetId };
+    state.presetId = p.id;
+    if (p.core) applyParamsToInputs(p.core);
+    if (p.goal) { applyGoalToInputs(p.goal); state.goalReturnTouched = false; }
+    if (p.young) applyYoungsterInputs(p.young);
+    switchToTab(p.tab);
+    updateAll();
+    showPresetNote(p);
+    document.querySelectorAll('.toast-message.is-preset').forEach(t => t.remove());
+    if (withUndo) {
+      const t = showToast(`Preset: ${escapeHtml(p.title)}`, '▶', () => {
+        applyParamsToInputs(before.core); applyPlanTabInputs(before.plan); applyYoungsterInputs(before.young);
+        const back = before.preset ? PRESET_LIST.find(x => x.id === before.preset) : null;
+        state.presetId = back ? back.id : null;
+        if (back) showPresetNote(back); else if (presetNote) presetNote.hidden = true;
+        switchToTab(before.tab); updateAll();
+      });
+      if (t) t.classList.add('is-preset');
+    }
+  }
+
+  if (presetBtn) presetBtn.addEventListener('click', (e) => { e.stopPropagation(); openPresetMenu(presetMenu.hidden); });
+  if (presetMenu) {
+    presetMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-preset]');
+      if (!item) return;
+      openPresetMenu(false);
+      applyPreset(item.getAttribute('data-preset'));
+    });
+    presetMenu.addEventListener('keydown', (e) => {
+      const items = Array.from(presetMenu.querySelectorAll('.preset-item'));
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); (items[i + 1] || items[0]).focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || items[items.length - 1]).focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); openPresetMenu(false); presetBtn.focus(); }
+    });
+  }
+  document.addEventListener('click', (e) => {
+    if (presetMenu && !presetMenu.hidden && !e.target.closest('.preset-wrap')) openPresetMenu(false);
+  });
+  const stepPreset = (d) => {
+    const i = PRESET_LIST.findIndex(x => x.id === state.presetId);
+    const next = PRESET_LIST[i + d];
+    if (next) applyPreset(next.id, false);
+  };
+  bindClick('btn-preset-prev', () => stepPreset(-1));
+  bindClick('btn-preset-next', () => stepPreset(1));
+  bindClick('btn-preset-close', clearPreset);
 
   // ---------- Help: manuals shown inside the app ----------
   const HELP_SECTION = { 'tab-core': 'core', 'tab-plan': 'goal', 'tab-actuals': 'review', 'tab-youngsters': 'youngster' };
@@ -2003,7 +2269,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // CSV Export
   function exportScheduleToCSV() {
     const params = getCurrentParams();
-    const result = CE.calculateSchedule(params, state.actualsHistory);
+    const result = CE.calculateSchedule(params, planActuals());
     let csv = `# Compounding Calculator v${APP_INFO.version} (${fmtAppDate(APP_INFO.date)}) - developed by ${APP_INFO.developer}\n` + 'Year,Self Added,Spouse Added,Core Opening,Core Addition,Core Returns,Core Closing,Sat Opening,Sat Addition,Sat Returns,Sat Closing,Total Corpus,Total Invested,Multiple,Yrs to Next 2x\n';
 
     result.yearlyRows.forEach(r => {
@@ -2059,6 +2325,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
       if (toast.parentNode) toast.parentNode.removeChild(toast);
     }, undoFn ? 7000 : 3500);
+    return toast;
   }
 
   // --- Modal Helpers ---
@@ -2507,6 +2774,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const u = users[profileId];
     if (!u) return;
     setActiveId(profileId);
+    state.presetId = null;
+    const pn = document.getElementById('preset-note'); if (pn) pn.hidden = true;
     applyParamsToInputs(u.params);
     state.actualsHistory = JSON.parse(JSON.stringify(u.actualsHistory || {}));
     state.reviewPending = {};

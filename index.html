@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="app-version" content="1.11">
+  <meta name="app-version" content="1.12">
   <title>Compounding Calculator — Core + Satellite</title>
   <meta name="description" content="Core + Satellite compounding calculator: projected corpus, IRR, doubling milestones, spouse contributions, goal planning, annual course-correction and a youngster cost-of-delay lab.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.11">
+  <link rel="stylesheet" href="styles.css?v=1.12">
 </head>
 <body>
 
@@ -30,6 +30,8 @@
       <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3.5h10V8M7 17H4.5V9h15v8H17M7 14h10v6.5H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
       <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4.2h4.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.1-2.4 3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.2" fill="currentColor"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.8v14.4L19 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-caret" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></symbol>
     </defs>
   </svg>
@@ -44,7 +46,7 @@
         </div>
         <div class="brand-titles">
           <h1>Compounding</h1>
-          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.11</span></button></div>
+          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.12</span></button></div>
         </div>
       </div>
 
@@ -94,7 +96,7 @@
           <div>Investor: <strong id="print-user-name">Sekhar</strong></div>
           <div>Date: <strong id="print-report-date">—</strong></div>
           <div>Horizon: <strong id="print-report-horizon">30 Years</strong></div>
-          <div>Version <strong data-app="version">1.11</strong></div>
+          <div>Version <strong data-app="version">1.12</strong></div>
         </div>
       </div>
       <div class="print-assumptions" id="print-assumptions"></div>
@@ -110,9 +112,27 @@
       </nav>
       <div class="nav-right">
         <p class="header-quote-pill" title="Popularly attributed to Albert Einstein; no record shows he said it">“Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn’t, pays it.” <span class="quote-by">— Albert Einstein</span></p>
+        <div class="preset-wrap">
+          <button type="button" class="btn-icon btn-compact" id="btn-presets" aria-haspopup="menu" aria-expanded="false" aria-controls="preset-menu" title="Ready-made demonstrations">
+            <svg class="ico"><use href="#i-play"/></svg> Presets <svg class="ico ico-caret"><use href="#i-caret"/></svg>
+          </button>
+          <div class="preset-menu" id="preset-menu" role="menu" aria-label="Presets" hidden></div>
+        </div>
         <button type="button" class="btn-icon btn-compact" id="btn-reset-page" title="Reset this page’s inputs">
           <svg class="ico"><use href="#i-reset"/></svg> Reset page
         </button>
+      </div>
+    </div>
+
+    <!-- Presenter note: shown while a preset is applied -->
+    <div class="preset-note" id="preset-note" role="status" hidden>
+      <div class="preset-note-body">
+        <p class="preset-note-text"><span class="preset-note-tag" id="preset-note-tag">Preset</span><strong id="preset-note-title"></strong> · <span id="preset-note-desc"></span></p>
+      </div>
+      <div class="preset-note-actions">
+        <button type="button" class="btn-icon btn-compact" id="btn-preset-prev">‹ Previous</button>
+        <button type="button" class="btn-icon btn-compact" id="btn-preset-next">Next ›</button>
+        <button type="button" class="modal-close-btn" id="btn-preset-close" aria-label="Close the preset note" title="Close (your own records come back)">&times;</button>
       </div>
     </div>
 
@@ -706,11 +726,16 @@
         <section class="page-banner">
           <div>
             <h2 class="page-title">Start early, end rich</h2>
-            <p class="page-lede">For a young investor, time is the biggest lever. Set an age and a monthly amount to see wealth at 50, 60 and 70 — and what waiting a few years really costs.</p>
+            <p class="page-lede">For a young investor, time is the biggest lever. Set an age, a lump sum or a monthly amount and the ages to check, and see what waiting a few years really costs.</p>
           </div>
-          <div class="banner-stat">
-            <div class="banner-stat-k">Years of compounding to 70</div>
-            <div class="spouse-stat-pill" id="disp-youngster-horizon">49 years</div>
+          <div class="banner-stat young-ages">
+            <div class="banner-stat-k">Show wealth at age</div>
+            <div class="age-inputs">
+              <input type="number" class="form-input age-input" id="inp-youngster-age-1" value="50" min="16" max="100" step="1" aria-label="First age to show">
+              <input type="number" class="form-input age-input" id="inp-youngster-age-2" value="60" min="16" max="100" step="1" aria-label="Second age to show">
+              <input type="number" class="form-input age-input" id="inp-youngster-age-3" value="70" min="16" max="100" step="1" aria-label="Third age to show">
+            </div>
+            <div class="banner-stat-sub"><strong id="disp-youngster-horizon">49 years</strong> of compounding <span id="disp-youngster-horizon-to">to 70</span></div>
           </div>
         </section>
 
@@ -720,6 +745,21 @@
               <div class="form-label"><span>Current age</span><span class="form-val-display" id="disp-youngster-age">21 yrs</span></div>
               <input type="range" class="range-input" id="inp-youngster-age" min="15" max="55" step="1" value="21" aria-label="Current age">
               <div class="range-marks"><span>15</span><span>55</span></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="inp-youngster-lump">Lump sum today</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">₹</span>
+                <input type="number" class="form-input has-prefix" id="inp-youngster-lump" value="0" step="100000" min="0">
+              </div>
+              <div class="quick-lump-chips quick-young-lump-chips">
+                <button type="button" class="chip-action active" data-val="0">None</button>
+                <button type="button" class="chip-action" data-val="100000">₹1 L</button>
+                <button type="button" class="chip-action" data-val="1000000">₹10 L</button>
+                <button type="button" class="chip-action" data-val="2500000">₹25 L</button>
+                <button type="button" class="chip-action" data-val="10000000">₹1 Cr</button>
+              </div>
             </div>
 
             <div class="form-group">
@@ -812,17 +852,17 @@
 
         <div class="kpi-grid youngster-kpi-grid">
           <div class="kpi-card age-card">
-            <div class="kpi-title">At age 50</div>
+            <div class="kpi-title" id="ykpi-title-1">At age 50</div>
             <div class="kpi-value val-sat" id="ykpi-corpus-50">—</div>
             <div class="kpi-sub"><span id="ykpi-corpus-50-exact">—</span> <span class="mult" id="ykpi-mult-50"></span></div>
           </div>
           <div class="kpi-card age-card">
-            <div class="kpi-title">At age 60</div>
+            <div class="kpi-title" id="ykpi-title-2">At age 60</div>
             <div class="kpi-value val-gold" id="ykpi-corpus-60">—</div>
             <div class="kpi-sub"><span id="ykpi-corpus-60-exact">—</span> <span class="mult" id="ykpi-mult-60"></span></div>
           </div>
           <div class="kpi-card age-card age-card-final">
-            <div class="kpi-title">At age 70</div>
+            <div class="kpi-title" id="ykpi-title-3">At age 70</div>
             <div class="kpi-value val-growth" id="ykpi-corpus">—</div>
             <div class="kpi-sub"><span id="ykpi-corpus-exact">—</span> <span class="mult" id="ykpi-mult-70"></span></div>
           </div>
@@ -837,7 +877,7 @@
             <div class="kpi-sub"><span id="ykpi-gain-share">—</span> · <span id="ykpi-multiple">—</span> <span id="ykpi-multiple-sub" hidden></span></div>
           </div>
           <div class="kpi-card kpi-accent-rose">
-            <div class="kpi-title">Cost of waiting 3 years</div>
+            <div class="kpi-title" id="ykpi-delay-title">Cost of waiting 3 years</div>
             <div class="kpi-value val-rose" id="ykpi-delay-5">—</div>
             <div class="kpi-sub" id="ykpi-delay-5-loss">—</div>
           </div>
@@ -846,8 +886,16 @@
         <div class="young-bottom">
           <section class="cost-of-delay-section">
             <div class="section-head">
-              <h3 class="section-title">What waiting costs</h3>
-              <p class="section-note">Same monthly amount and step-up, started 3, 6 or 9 years later. Loss is measured at age 70 against starting today at <strong>age <span id="disp-delay-current-age">21</span></strong>.</p>
+              <div class="section-title-row">
+                <h3 class="section-title">What waiting costs</h3>
+                <span class="seg-toggle wait-toggle" role="group" aria-label="Years of waiting to compare">
+                  <span class="seg-label">Wait in steps of</span>
+                  <button type="button" class="seg-btn active" data-wait="3" aria-pressed="true">3 yrs</button>
+                  <button type="button" class="seg-btn" data-wait="5" aria-pressed="false">5 yrs</button>
+                  <button type="button" class="seg-btn" data-wait="10" aria-pressed="false">10 yrs</button>
+                </span>
+              </div>
+              <p class="section-note" id="young-delay-note">Same lump sum, monthly amount and step-up, started 3, 6 or 9 years later. Loss is measured at age 70 against starting today at <strong>age <span id="disp-delay-current-age">21</span></strong>.</p>
             </div>
             <div class="youngster-grid" id="youngster-comparison-cards"></div>
           </section>
@@ -864,7 +912,7 @@
 
         <details class="table-card youngster-timeline-card" id="youngster-timeline-details">
           <summary>
-            <span class="table-title">Year-by-year table, age <span id="disp-timeline-start-age">21</span> to 70</span>
+            <span class="table-title">Year-by-year table, age <span id="disp-timeline-start-age">21</span> to <span id="disp-timeline-end-age">70</span></span>
             <span class="summary-hint">Show</span>
           </summary>
           <div class="table-responsive table-scroll">
@@ -880,7 +928,7 @@
     </div>
 
     <footer class="app-footer">
-      Compounding Calculator v<span data-app="version">1.11</span> (<span data-app="date">24 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
+      Compounding Calculator v<span data-app="version">1.12</span> (<span data-app="date">29 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
     </footer>
   </div>
 
@@ -1039,7 +1087,7 @@
         <button class="modal-close-btn" data-close="modal-about" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body about-body">
-        <div class="about-version">Version <strong data-app="version">1.11</strong> <span class="c-muted">· released <span data-app="date">24 Oct 2026</span></span></div>
+        <div class="about-version">Version <strong data-app="version">1.12</strong> <span class="c-muted">· released <span data-app="date">29 Oct 2026</span></span></div>
         <dl class="about-facts">
           <div><dt>Developed by</dt><dd data-app="developer">Sathiya Sekhar E</dd></div>
           <div><dt>For</dt><dd data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</dd></div>
@@ -1099,7 +1147,7 @@
 
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <script src="calculator.js?v=1.11"></script>
-  <script src="app.js?v=1.11"></script>
+  <script src="calculator.js?v=1.12"></script>
+  <script src="app.js?v=1.12"></script>
 </body>
 </html>

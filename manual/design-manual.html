@@ -7,15 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="manual.css?v=1.11">
-<script src="manual.js?v=1.11"></script>
+<link rel="stylesheet" href="manual.css?v=1.12">
+<script src="manual.js?v=1.12"></script>
 </head>
 <body>
 <div class="manual">
 
 <nav class="toc" aria-label="Contents">
   <p class="toc-title">Design manual</p>
-  <p class="toc-sub">Compounding Calculator v1.11</p>
+  <p class="toc-sub">Compounding Calculator v1.12</p>
   <ol>
     <li><a href="#purpose">Purpose and principles</a></li>
     <li><a href="#architecture">Architecture</a></li>
@@ -53,8 +53,8 @@
     <h1>Compounding <span>Calculator</span></h1>
     <p class="cover-lede">How the calculator is built: the files, every formula and solver, the data model, the visual system, the Windows installer and the web edition.</p>
     <ul class="cover-meta">
-      <li>Version <strong>1.11</strong></li>
-      <li>Released <strong>24 Oct 2026</strong></li>
+      <li>Version <strong>1.12</strong></li>
+      <li>Released <strong>29 Oct 2026</strong></li>
       <li>Developed by <strong>Sathiya Sekhar E</strong></li>
     </ul>
   </header>
@@ -93,6 +93,7 @@
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
       <tbody>
+        <tr><td><b>1.12</b></td><td class="nowrap">29 Oct 2026</td><td>Presets menu (19 demonstrations in four groups) with a presenter note and Previous / Next; plan pages leave year-end records out while a preset is shown; Youngster lab lump sum, three chosen ages up to 100 and waiting steps of 3, 5 or 10 years; CAGR table rates 12–30% including 23% and 26%; phone layout fix for the waiting cards.</td></tr>
         <tr><td><b>1.11</b></td><td class="nowrap">24 Oct 2026</td><td>Help button with the User manual and Design manual inside the app (opens at the current page, <kbd>F1</kbd>); manuals as PDF; storage pill no longer clips “• unsaved”; version stamps on file addresses so browsers never mix old and new files.</td></tr>
         <tr><td><b>1.10</b></td><td class="nowrap">21 Oct 2026</td><td>Users with IDs and goals; optional database file (local or OneDrive); annual review by user; merged Goal &amp; schedule page; spouse inside Core engine; step-up in % or ₹ with switch; SIP stop in years and months; 25/50/75% chart markers; IRR beside Blended CAGR; simplified Youngster lab with its own core/satellite sliders; Reset page with Undo; new defaults; formula fixes; new design; version control.</td></tr>
       </tbody>
@@ -139,7 +140,9 @@
         <path class="arrow" d="M525 160V104"/>
       </svg>
     </div>
-    <p>Every input fires <code>updateAll()</code>, which builds the parameter object, calls the engine with the user's <code>state.actualsHistory</code>, and redraws the Core engine, Goal &amp; schedule, Annual review and spouse comparison. The Youngster lab has its own <code>updateYoungsterLab()</code>. The goal, comparison and review solvers rerun the full schedule a few hundred times per update, which is still instant.</p>
+    <p>Every input fires <code>updateAll()</code>, which builds the parameter object, calls the engine with the user's year-end records (<code>planActuals()</code>: <code>state.actualsHistory</code>, or none while a preset is shown), and redraws the Core engine, Goal &amp; schedule, Annual review and spouse comparison. The Youngster lab has its own <code>updateYoungsterLab()</code>. The goal, comparison and review solvers rerun the full schedule a few hundred times per update, which is still instant.</p>
+    <h3>Presets</h3>
+    <p>A preset is data, not code: <code>applyPreset(id)</code> saves the current inputs for <i>Undo</i>, writes the preset's Core engine, goal and Youngster inputs into the form, sets <code>state.presetId</code>, opens its page and shows the presenter note. While <code>state.presetId</code> is set, <code>planActuals()</code> returns no records, so demonstrations are not mixed with the selected user's history; closing the note, Reset page or opening a user clears it. Presets never save anything.</p>
     <h3>Engine functions</h3>
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Function</th><th>Returns</th></tr></thead>
@@ -148,7 +151,7 @@
         <tr><td><code>analyzeSpouseImpact(params)</code></td><td>Self-only vs combined corpus, extra wealth, time saved.</td></tr>
         <tr><td><code>solveGoal(target, years, params, opts)</code></td><td>Year the goal is reached, SIP needed, CAGR needed.</td></tr>
         <tr><td><code>reviewActualsAndCorrect(params, actuals, target)</code></td><td>Revised projection, return and SIP needed from next year, revised goal year.</td></tr>
-        <tr><td><code>calculateYoungsterWealth(options)</code></td><td>Yearly rows to age 70, values at 50/60/70, delay scenarios.</td></tr>
+        <tr><td><code>calculateYoungsterWealth(options)</code></td><td>Yearly rows to the last checkpoint age, values at each checkpoint (<code>checkpoints</code>), delay scenarios.</td></tr>
         <tr><td><code>solveIRR(flows)</code></td><td>Annual IRR for cash flows at any times.</td></tr>
         <tr><td><code>steppedMonthly(base, year, stop, mode, pct, amt)</code></td><td>Monthly SIP in a given year.</td></tr>
         <tr><td><code>ratesForBlended(b, p)</code>, <code>weightedReturnOf(p)</code></td><td>Core/satellite rates for a blended return; the blended return of a plan.</td></tr>
@@ -261,7 +264,7 @@ r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exac
     <h3>Goal: year reached</h3>
     <p><code>yearReaching</code> on the current plan's 60-year rows; null means not within 60 years.</p>
     <h3>CAGR comparison table</h3>
-    <p>Blended rates 12, 15, 18, 20, 22, 25, 28 and 30%, plus the plan's and the assumed rate. For each: rates by the gap rule, the full schedule (with actuals), IRR, doubling time, corpus at the horizon, goal year and the SIP needed on time.</p>
+    <p>Blended rates 12, 15, 18, 20, 23, 26 and 30%, plus the plan's and the assumed rate. For each: rates by the gap rule, the full schedule (with actuals), IRR, doubling time, corpus at the horizon, goal year and the SIP needed on time.</p>
     <h3>Annual review: course correction</h3>
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Output</th><th>Method</th></tr></thead>
@@ -275,7 +278,12 @@ r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exac
     </table></div>
     <p>Past years are never changed by a correction. The goal horizon (not the Core engine horizon) is used throughout this page.</p>
     <h3>Youngster lab</h3>
-    <p>Same yearly rule as the Core engine with no lump sum, ages from current age to 70, and the tab's own three sliders: core allocation, core CAGR and satellite CAGR, as two pots without rebalancing. Delay scenarios rerun the model from age + 3, + 6 and + 9 with identical SIP settings (one level only), and report the loss at 70 in rupees and %.</p>
+    <p>Same yearly rule as the Core engine, with the tab's own three sliders (core allocation, core CAGR, satellite CAGR) as two pots without rebalancing.</p>
+    <div class="formula">lump L at the current age:  core₀ = L × c,  sat₀ = L × (1 − c),  invested₀ = L
+checkpointAges = three ages (sorted, ≤ 100); targetAge = the last one
+horizon = targetAge − current age
+checkpoints[i] = { age, corpus, invested, multiple }   <span class="cm">null corpus if the age is not after today</span></div>
+    <p>Delay scenarios rerun the model from age + <i>w</i>, + 2<i>w</i> and + 3<i>w</i> (<i>w</i> = 3, 5 or 10, chosen on the page) with the same lump sum and SIP settings (one level only), and report the loss at the last age in rupees and %.</p>
   </section>
 
   <!-- 6 -->
@@ -311,7 +319,7 @@ r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exac
       </tbody>
     </table></div>
     <h3>Database file</h3>
-    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.11",
+    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.12",
   "savedAt": "…", "users": { … }, "deleted": { "old.user": "2026-…" } }</div>
     <ul>
       <li>Created or opened with the File System Access API (Chromium browsers: Edge, Chrome).</li>
@@ -326,7 +334,7 @@ r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exac
       <tbody>
         <tr><td>Core engine and new users</td><td>₹1,00,000 lump, ₹10,000 SIP, step-up on 10% (₹1,000 in ₹ mode), last step-up year 10, SIP 10 yrs 0 months, 70/30, 15% / 25%, horizon 30, spouse off.</td></tr>
         <tr><td>Goal</td><td>₹10 Cr in 20 years, assumed return = plan's blended CAGR.</td></tr>
-        <tr><td>Youngster lab</td><td>Age 21, ₹10,000, step-up 5% (₹500 in ₹ mode), stop step-up 10, stop SIP 10 yrs 0 months, 70% / 17% / 27%.</td></tr>
+        <tr><td>Youngster lab</td><td>Age 21, no lump sum, ₹10,000, step-up 5% (₹500 in ₹ mode), stop step-up 10, stop SIP 10 yrs 0 months, 70% / 17% / 27%, ages 50 / 60 / 70, waiting steps of 3 years.</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -374,6 +382,7 @@ r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exac
         <tr><td>Tables</td><td>Horizon row highlighted, right-aligned tabular numbers, sideways scroll inside the card on narrow screens.</td></tr>
         <tr><td>Pills</td><td>Version (gold outline) and storage status (dot: grey browser, green file, gold warning).</td></tr>
         <tr><td>Modals and toasts</td><td>Users, database, About, Print, Help. Toasts confirm actions and can carry <i>Undo</i>.</td></tr>
+        <tr><td>Presets menu and note</td><td>Menu under <span class="ui">Presets</span> in the tab bar: groups with a gold heading, numbered items with a one-line description, arrow-key navigation. The presenter note is a gold-outlined strip under the tabs with the preset number, title, talking point, ‹ Previous / Next › and ×.</td></tr>
         <tr><td>Help viewer</td><td>Large modal with a User / Design switch and the manual in a frame, opened at the current page's chapter.</td></tr>
       </tbody>
     </table></div>
@@ -489,6 +498,8 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
       <li>Add it to <code>defaultPlanParams()</code>, <code>readInputsForProfile()</code> and <code>applyParamsToInputs()</code> so it saves, loads and resets.</li>
       <li>Add a test case and update both manuals.</li>
     </ol>
+    <h3>Adding a preset</h3>
+    <p>Presets live in <code>PRESET_GROUPS</code> in <code>app.js</code>. Each item has an <code>id</code>, <code>title</code>, <code>sub</code> (menu line), <code>tab</code> to open, <code>note</code> (talking point) and any of: <code>core</code> (built with <code>corePreset({...})</code>, Core engine inputs in screen units), <code>goal</code> ({target, years}) and <code>young</code> (built with <code>youngPreset({...})</code>). Add the item to a group and to the table in the User manual. Check its figures with the engine before using it in a talk.</p>
     <h3>Adding a page</h3>
     <p>Add a <code>tab-btn</code> with <code>data-tab</code> and a matching <code>tab-panel</code>; give it an update function called from <code>updateAll()</code>; add its case to <code>resetPage()</code>; add an entry to <code>HELP_SECTION</code> and a chapter with that id in the User manual.</p>
     <h3>Conventions</h3>
@@ -499,7 +510,7 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
       <li>Wrap every storage access in try/catch; the app must work with storage blocked.</li>
       <li>Plain sentences on screen: say what happens and what to do.</li>
     </ul>
-    <footer class="manual-footer">Compounding Calculator v1.11 · 24 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
+    <footer class="manual-footer">Compounding Calculator v1.12 · 29 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
   </section>
 </article>
 </div>
