@@ -1,0 +1,15 @@
+{
+  "name": "compounding-calculator",
+  "version": "1.14.0",
+  "private": true,
+  "description": "Core + Satellite Compounding Calculator — plain HTML/CSS/JS, no build step",
+  "scripts": {
+    "serve": "npx --yes http-server -p 8000 -c-1 .",
+    "test": "node tools/smoke-test.js",
+    "screenshots": "node tools/screenshots.js",
+    "pdfs": "node tools/manual-pdfs.js"
+  },
+  "devDependencies": {
+    "playwright": "1.56.0"
+  }
+}

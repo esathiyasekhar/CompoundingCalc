@@ -99,6 +99,12 @@ test_milestones.html  Youngster lab checkpoints at 50, 60 and 70
 
 ---
 
+## Working on the code
+
+- `CLAUDE.md` has the project notes, reference figures and release checklist (Claude Code reads it automatically).
+- `npm install && npx playwright install chromium`, then `npm test` runs the smoke test; `npm run screenshots` and `npm run pdfs` rebuild the manual images and PDFs.
+- `installer/build.ps1` (Windows) or `installer/build.sh` builds `dist/CompoundingCalculator-Setup.exe` with Go 1.21+.
+
 ## Publishing an update on GitHub Pages
 
 1. Replace **all** the files together, including the whole `manual/` folder (with `img/`). `index.html` stays at the top level.
