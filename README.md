@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/34114287/README.md)
 # Compounding Calculator
 
 **Core + Satellite wealth engine · v1.11 · Developed by Sathiya Sekhar E**
