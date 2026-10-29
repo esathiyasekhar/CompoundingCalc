@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Calculator Verification Test Suite</title>
+  <script src="calculator.js"></script>
+</head>
+<body>
+  <h1>Test Suite Results</h1>
+  <div id="test-output"></div>
+
+  <script>
+    const out = document.getElementById('test-output');
+    function log(msg) {
+      console.log(msg);
+      const p = document.createElement('p');
+      p.textContent = msg;
+      out.appendChild(p);
+    }
+
+    try {
+      const CE = window.CompoundingEngine;
+      if (!CE) throw new Error('CompoundingEngine not found on window');
+
+      // Scenario A: Default Full Plan
+      const pA = {
+        selfLump: 500000,
+        selfMonthly: 25000,
+        selfInclude: true,
+        selfStepUp: 0.10,
+        selfStepUpStop: 7,
+        selfAddStop: 7,
+        coreAlloc: 0.70,
+        satAlloc: 0.30,
+        coreReturn: 0.20,
+        satReturn: 0.30,
+        horizon: 30,
+        spouseInclude: false,
+        spouseLump: 0,
+        spouseMonthly: 0,
+        maxYears: 60
+      };
+      const resA = CE.calculateSchedule(pA);
+      log(`TEST A (Default Full Plan): Invested=${resA.totalInvested.toFixed(0)}, Corpus=${resA.totalCorpus.toFixed(0)}, Multiple=${resA.multiple.toFixed(1)}x, Milestones=${resA.milestones.length}`);
+      if (resA.totalInvested < 3300000 || resA.totalCorpus < 1e9) throw new Error('Test A values unexpected');
+
+      // Scenario B: Turn OFF Include Monthly Additions (User Issue)
+      const pB = Object.assign({}, pA, { selfInclude: false });
+      const resB = CE.calculateSchedule(pB);
+      log(`TEST B (Monthly Additions OFF): Invested=${resB.totalInvested.toFixed(0)}, Corpus=${resB.totalCorpus.toFixed(0)}, Multiple=${resB.multiple.toFixed(1)}x, IRR=${(resB.portfolioIRR * 100).toFixed(2)}%, Milestones=${resB.milestones.length}`);
+      if (resB.totalInvested !== 500000) throw new Error(`Test B Failed: Invested should be 500000, got ${resB.totalInvested}`);
+      if (resB.totalCorpus < 4.5e8 || resB.totalCorpus > 5e8) throw new Error(`Test B Failed: Corpus should be ~47.61 Cr, got ${resB.totalCorpus}`);
+      if (resB.milestones.length === 0) throw new Error('Test B Failed: Milestones should not be empty');
+      if (resB.portfolioIRR <= 0) throw new Error('Test B Failed: Portfolio IRR should be positive');
+
+      // Scenario C: Pure SIP Plan (Lump sum = 0, Monthly additions ON)
+      const pC = Object.assign({}, pA, { selfLump: 0, selfInclude: true });
+      const resC = CE.calculateSchedule(pC);
+      log(`TEST C (Pure SIP, Lump 0): Invested=${resC.totalInvested.toFixed(0)}, Corpus=${resC.totalCorpus.toFixed(0)}, Multiple=${resC.multiple.toFixed(1)}x, Milestones=${resC.milestones.length}`);
+      if (resC.totalInvested !== (resA.totalInvested - 500000)) throw new Error('Test C Invested mismatch');
+      if (resC.totalCorpus <= 0) throw new Error('Test C Corpus should be positive');
+
+      // Scenario D: True ₹0 Plan (Both lump sum and monthly additions 0)
+      const pD = Object.assign({}, pA, { selfLump: 0, selfMonthly: 0, selfInclude: false, spouseLump: 0, spouseInclude: false });
+      const resD = CE.calculateSchedule(pD);
+      log(`TEST D (True Zero): Invested=${resD.totalInvested.toFixed(0)}, Corpus=${resD.totalCorpus.toFixed(0)}, Multiple=${resD.multiple.toFixed(1)}x, Milestones=${resD.milestones.length}`);
+      if (resD.totalInvested !== 0) throw new Error('Test D Invested should be 0');
+      if (resD.totalCorpus !== 0) throw new Error('Test D Corpus should be 0');
+      if (resD.milestones.length !== 0) throw new Error('Test D Milestones should be empty');
+
+      // Scenario E: Goal Planner with Monthly Additions OFF
+      const goalResB = CE.solveGoal(100000000, 20, pB);
+      log(`TEST E (Goal Planner with Monthly OFF): TimeToGoal=${goalResB.timeToGoalYears ? goalResB.timeToGoalYears.toFixed(1) : 'null'} yrs, ReqSIP=${goalResB.requiredMonthlySIP ? goalResB.requiredMonthlySIP.toFixed(0) : 'null'}, ReqRate=${goalResB.requiredBlendedReturn ? (goalResB.requiredBlendedReturn * 100).toFixed(1) + '%' : 'null'}`);
+      if (!goalResB.requiredMonthlySIP || goalResB.requiredMonthlySIP <= 0) throw new Error('Test E Failed: Required SIP should be positive');
+
+      // Scenario F: Spouse Impact with Monthly Additions OFF
+      const spouseResB = CE.analyzeSpouseImpact(pB);
+      log(`TEST F (Spouse Impact with Monthly OFF): SoloCorpus=${spouseResB.selfCorpus.toFixed(0)}, CombinedCorpus=${spouseResB.combinedCorpus.toFixed(0)}, ExtraCorpus=${spouseResB.extraCorpusAtHorizon.toFixed(0)}`);
+      if (spouseResB.selfCorpus < 4.5e8) throw new Error('Test F Solo corpus should be ~47.61 Cr');
+
+      // Scenario G: Annual Review with Monthly Additions OFF
+      const reviewResB = CE.reviewActualsAndCorrect(pB, { 1: { coreReturn: 0.15, satReturn: 0.25 } });
+      log(`TEST G (Review with Monthly OFF): Baseline=${reviewResB.baselineCorpus.toFixed(0)}, Revised=${reviewResB.revisedCorpus.toFixed(0)}, Gap=${reviewResB.gap.toFixed(0)}, ReqFutureRate=${reviewResB.requiredFutureRate ? (reviewResB.requiredFutureRate * 100).toFixed(1) + '%' : 'null'}, ReqFutureSIP=${reviewResB.requiredFutureSIP}`);
+      if (reviewResB.baselineCorpus < 4.5e8) throw new Error('Test G Baseline should be ~47.61 Cr');
+
+      // Scenario H: Youngster Lab with zero additions
+      const youngsterResZero = CE.calculateYoungsterWealth({
+        currentAge: 21,
+        targetAge: 70,
+        monthly: 0,
+        stepUpEnabled: false,
+        stepUpPct: 0,
+        stepUpStopYears: 10,
+        additionsStopYears: 10,
+        rate: 20.0
+      });
+      log(`TEST H (Youngster Zero Monthly): Invested=${youngsterResZero.totalInvested}, Corpus=${youngsterResZero.corpus}, Multiple=${youngsterResZero.multiple}`);
+      if (youngsterResZero.totalInvested !== 0 || youngsterResZero.corpus !== 0) throw new Error('Test H Failed');
+
+      log('SUCCESS: ALL 8 TEST SUITES PASSED FLAWLESSLY!');
+    } catch (err) {
+      log('FAILED: ' + err.message);
+    }
+  </script>
+</body>
+</html>

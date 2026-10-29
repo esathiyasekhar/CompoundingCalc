@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="app-version" content="1.11">
+  <title>Compounding Calculator — Core + Satellite</title>
+  <meta name="description" content="Core + Satellite compounding calculator: projected corpus, IRR, doubling milestones, spouse contributions, goal planning, annual course-correction and a youngster cost-of-delay lab.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1.11">
+</head>
+<body>
+
+  <!-- Icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-core" viewBox="0 0 24 24"><path d="M3 20h18M5 20V10m5 10V6m5 14v-8m5 8V4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-spouse" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16.5" cy="9" r="2.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.6-3.6 2.8-5.6 5.5-5.6s4.9 2 5.5 5.6M13.5 15c.9-.6 1.9-.9 3-.9 2.4 0 4.3 1.8 4.9 5.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-goal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></symbol>
+      <symbol id="i-review" viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6h5v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-double" viewBox="0 0 24 24"><path d="M3 20h4v-3h4v-4h4V8h4V4h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-young" viewBox="0 0 24 24"><path d="M12 21V11M12 11c0-4 3-6.5 7-6.5 0 4-3 6.5-7 6.5zM12 14c0-3-2.3-5-5.5-5 0 3 2.3 5 5.5 5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M3.5 15h17M10 4.5v15" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+      <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 4v5h7V4M8 20v-6h8v6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M4 19.5h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3.5h10V8M7 17H4.5V9h15v8H17M7 14h10v6.5H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4.2h4.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.1-2.4 3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.2" fill="currentColor"/></symbol>
+      <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M6 33 C 16 32, 24 26, 34 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><circle cx="34" cy="7" r="3.4" fill="currentColor"/><path d="M6 33h28" stroke="currentColor" stroke-width="1.6" opacity=".45"/></svg>
+        </div>
+        <div class="brand-titles">
+          <h1>Compounding</h1>
+          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.11</span></button></div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="profile-header-group">
+          <label class="header-label" for="profile-select">User</label>
+          <select id="profile-select" class="profile-select" title="Switch user"></select>
+          <span class="profile-status-badge" id="profile-status-badge" hidden></span>
+          <button class="btn btn-save-profile btn-compact" id="btn-save-profile" title="Save the plan and goal to this user">
+            <svg class="ico"><use href="#i-save"/></svg> Save
+          </button>
+          <button class="btn-icon btn-compact" id="btn-new-profile" title="Create a new user with a plan and goal">
+            <svg class="ico"><use href="#i-plus"/></svg> New user
+          </button>
+          <button class="btn-icon btn-compact" id="btn-manage-profiles" title="Users, database file, import and export">
+            <svg class="ico"><use href="#i-gear"/></svg> Manage
+          </button>
+        </div>
+
+        <button type="button" class="db-status" id="db-status" title="Where user data is saved">Saved in this browser</button>
+
+        <div class="header-action-group">
+          <button class="btn-icon btn-compact" id="export-csv-btn" title="Download the 60-year schedule as CSV">
+            <svg class="ico"><use href="#i-download"/></svg> CSV
+          </button>
+          <button class="btn-icon btn-compact" id="print-summary-btn" title="Print or save a PDF report">
+            <svg class="ico"><use href="#i-print"/></svg> PDF
+          </button>
+          <button class="btn-icon btn-compact" id="btn-help" title="User manual and design manual — opens at the page you are on">
+            <svg class="ico"><use href="#i-help"/></svg> Help
+          </button>
+          <button class="btn-icon btn-compact" id="theme-toggle-btn" title="Switch light / dark">
+            <svg class="ico"><use href="#i-theme"/></svg> <span id="theme-text">Light</span><span id="theme-icon" hidden></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Print-only report header -->
+    <div class="print-only print-dossier-header">
+      <div class="print-title-row">
+        <div>
+          <div class="print-main-title">Compounding wealth report</div>
+          <div class="print-subtitle">Core + Satellite model · Developed by <span data-app="developer">Sathiya Sekhar E</span></div>
+        </div>
+        <div class="print-meta-right">
+          <div>Investor: <strong id="print-user-name">Sekhar</strong></div>
+          <div>Date: <strong id="print-report-date">—</strong></div>
+          <div>Horizon: <strong id="print-report-horizon">30 Years</strong></div>
+          <div>Version <strong data-app="version">1.11</strong></div>
+        </div>
+      </div>
+      <div class="print-assumptions" id="print-assumptions"></div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="top-nav-presets-bar">
+      <nav class="tabs-navigation" aria-label="Calculator sections">
+        <button class="tab-btn active" data-tab="tab-core"><svg class="ico"><use href="#i-core"/></svg> Core engine</button>
+        <button class="tab-btn" data-tab="tab-plan"><svg class="ico"><use href="#i-goal"/></svg> Goal &amp; schedule</button>
+        <button class="tab-btn" data-tab="tab-actuals"><svg class="ico"><use href="#i-review"/></svg> Annual review</button>
+        <button class="tab-btn" data-tab="tab-youngsters"><svg class="ico"><use href="#i-young"/></svg> Youngster lab</button>
+      </nav>
+      <div class="nav-right">
+        <p class="header-quote-pill" title="Popularly attributed to Albert Einstein; no record shows he said it">“Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn’t, pays it.” <span class="quote-by">— Albert Einstein</span></p>
+        <button type="button" class="btn-icon btn-compact" id="btn-reset-page" title="Reset this page’s inputs">
+          <svg class="ico"><use href="#i-reset"/></svg> Reset page
+        </button>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 1: CORE ENGINE
+         ========================================================================= -->
+    <div class="tab-panel active" id="tab-core">
+      <div class="calculator-layout">
+
+        <aside class="inputs-sidebar">
+          <section class="card card-strategy">
+            <div class="card-header">
+              <h2 class="card-title">Portfolio strategy</h2>
+              <span class="card-hint">Applies to everyone’s money</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">
+                <span>Core allocation</span>
+                <span class="form-val-display" id="disp-core-alloc">70%</span>
+              </div>
+              <input type="range" class="range-input" id="inp-core-alloc" min="0" max="100" step="5" value="70" aria-label="Core allocation percent">
+            </div>
+
+            <div class="alloc-bar-container">
+              <div class="alloc-track">
+                <div class="alloc-segment-core" id="bar-core-segment" style="width: 70%;"></div>
+                <div class="alloc-segment-sat" id="bar-sat-segment" style="width: 30%;"></div>
+              </div>
+              <div class="alloc-bar-labels">
+                <span class="alloc-bar-core" id="label-core-split">Core: 70%</span>
+                <span class="alloc-bar-sat" id="label-sat-split">Satellite: 30%</span>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <div class="form-label">
+                  <span>Core CAGR</span>
+                  <span class="form-val-display val-core" id="disp-core-ret">15.0%</span>
+                </div>
+                <input type="range" class="range-input range-core" id="inp-core-ret" min="8" max="32" step="0.5" value="15" aria-label="Core expected return">
+                <div class="range-marks"><span>8%</span><span>32%</span></div>
+              </div>
+              <div class="form-group">
+                <div class="form-label">
+                  <span>Satellite CAGR</span>
+                  <span class="form-val-display val-sat" id="disp-sat-ret">25.0%</span>
+                </div>
+                <input type="range" class="range-input range-sat" id="inp-sat-ret" min="15" max="45" step="0.5" value="25" aria-label="Satellite expected return">
+                <div class="range-marks"><span>15%</span><span>45%</span></div>
+              </div>
+            </div>
+
+            <div class="form-group form-group-last">
+              <div class="form-label">
+                <span>Horizon</span>
+                <span class="form-val-display val-gold" id="disp-horizon">30 yrs</span>
+              </div>
+              <input type="range" class="range-input range-gold" id="inp-horizon" min="1" max="60" step="1" value="30" aria-label="Investment horizon in years">
+              <div class="range-marks"><span>1</span><span>15</span><span>30</span><span>45</span><span>60</span></div>
+            </div>
+          </section>
+
+          <section class="card card-contributions">
+            <div class="contrib-tabs-nav" role="tablist">
+              <button type="button" class="contrib-tab-btn active" id="tab-btn-self" data-target="pane-self">
+                Self <span class="contrib-chip" id="chip-self-val">₹25k/mo</span>
+              </button>
+              <button type="button" class="contrib-tab-btn" id="tab-btn-spouse" data-target="pane-spouse">
+                Spouse <span class="contrib-chip chip-off" id="chip-spouse-val">Off</span>
+              </button>
+            </div>
+
+            <div class="contrib-pane active" id="pane-self">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="inp-self-lump">Initial lump sum</label>
+                  <div class="input-wrapper">
+                    <span class="input-prefix">₹</span>
+                    <input type="number" class="form-input has-prefix" id="inp-self-lump" value="100000" step="50000" min="0">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-self-monthly">Monthly SIP</label>
+                  <div class="input-wrapper">
+                    <span class="input-prefix">₹</span>
+                    <input type="number" class="form-input has-prefix" id="inp-self-monthly" value="10000" step="5000" min="0">
+                  </div>
+                </div>
+              </div>
+
+              <div class="toggle-group">
+                <span class="toggle-label">Include monthly SIP</span>
+                <label class="switch">
+                  <input type="checkbox" id="inp-self-include" checked>
+                  <span class="slider-switch"></span>
+                </label>
+              </div>
+
+              <div id="self-additions-container" class="fade-block">
+                <div class="form-group stepup-group" data-who="self">
+                  <div class="form-label">
+                    <span>Yearly step-up</span>
+                    <span class="inline-switch">
+                      <span class="seg-toggle" role="group" aria-label="Step-up as percent or rupees">
+                        <button type="button" class="seg-btn active" data-mode="pct" aria-pressed="true">%</button>
+                        <button type="button" class="seg-btn" data-mode="amt" aria-pressed="false">₹</button>
+                      </span>
+                      <label class="switch switch-sm" title="Turn the yearly step-up on or off">
+                        <input type="checkbox" id="inp-self-stepup-enable" checked aria-label="Self yearly step-up on or off">
+                        <span class="slider-switch"></span>
+                      </label>
+                    </span>
+                    <input type="hidden" id="inp-self-stepup-mode" value="pct">
+                  </div>
+                  <div class="stepup-pct">
+                    <div class="stepup-row">
+                      <input type="range" class="range-input" id="inp-self-stepup" min="0" max="25" step="0.5" value="10" aria-label="Self yearly step-up percent">
+                      <span class="form-val-display" id="disp-self-stepup">10%</span>
+                    </div>
+                  </div>
+                  <div class="stepup-amt" hidden>
+                    <div class="input-wrapper">
+                      <span class="input-prefix">₹</span>
+                      <input type="number" class="form-input has-prefix" id="inp-self-stepup-amt" value="1000" step="500" min="0" aria-label="Self rupees added to the monthly SIP each year">
+                      <span class="input-suffix">/mo more each year</span>
+                    </div>
+                  </div>
+                  <div class="stepup-equiv" id="eq-self-stepup">—</div>
+                </div>
+                <div class="form-group form-inline" id="group-self-stepup-stop">
+                  <label class="form-label" for="inp-self-stepup-stop">Last step-up in year</label>
+                  <input type="number" class="form-input input-narrow" id="inp-self-stepup-stop" min="1" max="60" value="10">
+                </div>
+                <div class="form-group form-group-last">
+                  <label class="form-label" for="inp-self-add-stop">SIP runs for</label>
+                  <div class="yrs-mos">
+                    <input type="number" class="form-input" id="inp-self-add-stop" min="0" max="60" value="10" aria-label="Years of SIP">
+                    <span>yrs</span>
+                    <select class="form-select" id="inp-self-add-stop-months" aria-label="Extra months of SIP"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option></select>
+                    <span>months</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="contrib-pane" id="pane-spouse">
+              <div class="toggle-group">
+                <span class="toggle-label">Add spouse’s investments</span>
+                <label class="switch">
+                  <input type="checkbox" id="inp-spouse-include">
+                  <span class="slider-switch"></span>
+                </label>
+              </div>
+
+              <div id="spouse-inputs-container" class="fade-block is-off">
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label" for="inp-spouse-lump">Initial lump sum</label>
+                    <div class="input-wrapper">
+                      <span class="input-prefix">₹</span>
+                      <input type="number" class="form-input has-prefix" id="inp-spouse-lump" value="0" step="50000" min="0">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="inp-spouse-monthly">Monthly SIP</label>
+                    <div class="input-wrapper">
+                      <span class="input-prefix">₹</span>
+                      <input type="number" class="form-input has-prefix" id="inp-spouse-monthly" value="25000" step="5000" min="0">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group stepup-group" data-who="spouse">
+                  <div class="form-label">
+                    <span>Yearly step-up</span>
+                    <span class="inline-switch">
+                      <span class="seg-toggle" role="group" aria-label="Step-up as percent or rupees">
+                        <button type="button" class="seg-btn active" data-mode="pct" aria-pressed="true">%</button>
+                        <button type="button" class="seg-btn" data-mode="amt" aria-pressed="false">₹</button>
+                      </span>
+                      <label class="switch switch-sm" title="Turn the yearly step-up on or off">
+                        <input type="checkbox" id="inp-spouse-stepup-enable" checked aria-label="Spouse yearly step-up on or off">
+                        <span class="slider-switch"></span>
+                      </label>
+                    </span>
+                    <input type="hidden" id="inp-spouse-stepup-mode" value="pct">
+                  </div>
+                  <div class="stepup-pct">
+                    <div class="stepup-row">
+                      <input type="range" class="range-input" id="inp-spouse-stepup" min="0" max="25" step="0.5" value="10" aria-label="Spouse yearly step-up percent">
+                      <span class="form-val-display" id="disp-spouse-stepup">10%</span>
+                    </div>
+                  </div>
+                  <div class="stepup-amt" hidden>
+                    <div class="input-wrapper">
+                      <span class="input-prefix">₹</span>
+                      <input type="number" class="form-input has-prefix" id="inp-spouse-stepup-amt" value="1000" step="500" min="0" aria-label="Spouse rupees added to the monthly SIP each year">
+                      <span class="input-suffix">/mo more each year</span>
+                    </div>
+                  </div>
+                  <div class="stepup-equiv" id="eq-spouse-stepup">—</div>
+                </div>
+                <div class="form-group form-inline" id="group-spouse-stepup-stop">
+                  <label class="form-label" for="inp-spouse-stepup-stop">Last step-up in year</label>
+                  <input type="number" class="form-input input-narrow" id="inp-spouse-stepup-stop" min="1" max="60" value="30">
+                </div>
+                <div class="form-group form-group-last">
+                  <label class="form-label" for="inp-spouse-add-stop">SIP runs for</label>
+                  <div class="yrs-mos">
+                    <input type="number" class="form-input" id="inp-spouse-add-stop" min="0" max="60" value="30" aria-label="Years of SIP">
+                    <span>yrs</span>
+                    <select class="form-select" id="inp-spouse-add-stop-months" aria-label="Extra months of SIP"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option></select>
+                    <span>months</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </aside>
+
+        <main class="results-main">
+          <!-- Hero: the corpus and what it is made of -->
+          <section class="hero-band kpi-card-hero" aria-label="Projected corpus">
+            <div class="hero-left">
+              <div class="hero-label">Your corpus in year <span id="kpi-horizon-yr">30</span></div>
+              <div class="hero-value" id="kpi-total-corpus">₹166.10 Cr</div>
+              <div class="hero-exact">
+                <span id="kpi-total-corpus-exact">₹1,66,09,81,227</span>
+                <span class="kpi-pill pill-success" id="kpi-multiple-badge">496.4x of invested</span>
+              </div>
+
+              <div class="comp-bar" aria-hidden="true">
+                <div class="comp-seg comp-invested" id="comp-invested-seg" style="width: 1%"></div>
+                <div class="comp-seg comp-gain" id="comp-gain-seg" style="width: 99%"></div>
+              </div>
+              <div class="comp-legend">
+                <div class="comp-item">
+                  <span class="swatch sw-invested"></span>
+                  <div>
+                    <div class="comp-k">You put in</div>
+                    <div class="comp-v" id="kpi-total-invested">₹33.46 L</div>
+                    <div class="comp-s" id="kpi-invested-exact">₹33,46,151</div>
+                  </div>
+                </div>
+                <div class="comp-item">
+                  <span class="swatch sw-gain"></span>
+                  <div>
+                    <div class="comp-k">Compounding added</div>
+                    <div class="comp-v val-growth" id="kpi-wealth-gain">₹165.76 Cr</div>
+                    <div class="comp-s" id="kpi-wealth-gain-pill">99.8% of the corpus</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-right">
+              <div class="speed-block">
+                <div class="rate-pair">
+                  <div>
+                    <div class="speed-k">Portfolio IRR</div>
+                    <div class="speed-v" id="kpi-irr">25.54%</div>
+                  </div>
+                  <div>
+                    <div class="speed-k">Blended CAGR</div>
+                    <div class="speed-v speed-v-cagr" id="kpi-weighted-rate">23.0%</div>
+                  </div>
+                </div>
+                <div class="speed-s" id="rate-gap-note">—</div>
+              </div>
+              <div class="speed-row">
+                <div>
+                  <div class="speed-k">Money doubles every</div>
+                  <div class="speed-v2" id="kpi-doubling-time">3.05 yrs</div>
+                </div>
+                <div>
+                  <div class="speed-k">Next doubling horizon</div>
+                  <div class="speed-v2" id="kpi-next-2x">2.80 yrs</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Core vs satellite split -->
+          <section class="split-strip">
+            <div class="split-side kpi-card-core">
+              <div class="split-k">Core corpus</div>
+              <div class="split-v val-core" id="kpi-core-corpus">₹33.32 Cr</div>
+              <div class="split-s" id="kpi-core-sub">₹33,32,06,029 (20.1% of wealth)</div>
+            </div>
+            <div class="split-mid">
+              <div class="split-bar"><div class="split-core" id="split-core-seg" style="width:20%"></div><div class="split-sat" id="split-sat-seg" style="width:80%"></div></div>
+              <div class="split-caption" id="split-caption">Satellite started at 30% of the money and ends as 80% of the wealth</div>
+            </div>
+            <div class="split-side split-side-right kpi-card-sat">
+              <div class="split-k">Satellite corpus</div>
+              <div class="split-v val-sat" id="kpi-sat-corpus">₹132.78 Cr</div>
+              <div class="split-s" id="kpi-sat-sub">₹1,32,77,75,199 (79.9% of wealth)</div>
+            </div>
+          </section>
+
+          <section class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h2 class="card-title">Growth path</h2>
+                <div class="chart-sub" id="chart-share-note">—</div>
+              </div>
+              <div class="chart-controls" role="group" aria-label="Chart scale">
+                <button class="chart-btn active" id="btn-scale-linear">Linear</button>
+                <button class="chart-btn" id="btn-scale-log">Log</button>
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="growthChart" aria-label="Corpus growth chart"></canvas>
+            </div>
+          </section>
+
+          <!-- Print-only: doubling ladder for the main plan -->
+          <section class="print-only print-milestones">
+            <h3>Doubling milestones (multiples of starting capital)</h3>
+            <table class="data-table" id="print-milestones-table">
+              <thead><tr><th>Multiple</th><th>Corpus</th><th>Year reached</th><th>Gap</th><th>Status</th></tr></thead>
+              <tbody id="print-milestones-tbody"></tbody>
+            </table>
+          </section>
+
+          <section class="spouse-strip" id="spouse-strip" hidden aria-label="Spouse effect">
+            <div class="ss-item">
+              <div class="ss-k">Self only</div>
+              <div class="ss-v val-rose" id="spouse-comp-solo">—</div>
+              <div class="ss-s">Invested <span id="spouse-comp-solo-inv">—</span></div>
+            </div>
+            <div class="ss-item">
+              <div class="ss-k">With spouse</div>
+              <div class="ss-v val-growth" id="spouse-comp-team">—</div>
+              <div class="ss-s">Invested <span id="spouse-comp-team-inv">—</span></div>
+            </div>
+            <div class="ss-item">
+              <div class="ss-k">Extra from spouse</div>
+              <div class="ss-v val-gold" id="spouse-comp-extra">—</div>
+              <div class="ss-s" id="spouse-comp-multiplier">—</div>
+            </div>
+            <div class="ss-item">
+              <div class="ss-k">Same corpus reached sooner by</div>
+              <div class="ss-v" id="spouse-time-saved">—</div>
+              <div class="ss-s">Year <span id="spouse-comp-reach-yr">—</span> instead of year <span id="spouse-horizon-label">30</span><span id="spouse-comp-years-saved" hidden></span></div>
+            </div>
+          </section>
+
+          <section class="wisdom-bottom-row" aria-label="Principles">
+            <figure class="wisdom-card">
+              <blockquote class="wisdom-quote">“The first rule of compounding: never interrupt it unnecessarily.”</blockquote>
+              <figcaption class="wisdom-author">Charlie Munger</figcaption>
+            </figure>
+            <figure class="wisdom-card">
+              <blockquote class="wisdom-quote">“We always knew we were going to be rich. We were just never in a hurry.”</blockquote>
+              <figcaption class="wisdom-author">Warren Buffett</figcaption>
+            </figure>
+            <figure class="wisdom-card wisdom-card-principle">
+              <blockquote class="wisdom-quote">“To win, first survive. Be patient, avoid leverage, and let uninterrupted time compound your capital.”</blockquote>
+              <figcaption class="wisdom-author">Technofunda principle</figcaption>
+            </figure>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 2: GOAL & SCHEDULE (goal, CAGR comparison, doubling ladder, year-by-year)
+         ========================================================================= -->
+    <div class="tab-panel" id="tab-plan">
+      <section class="card goal-planner-card">
+        <div class="page-banner page-banner-flat">
+          <div>
+            <h2 class="page-title">Your goal</h2>
+            <p class="page-lede">The selected user’s goal — press Save in the header to keep changes. See when the plan gets there, the SIP that hits it on time, and the CAGR that would do it with today’s SIP.</p>
+          </div>
+        </div>
+
+        <div class="goal-inputs">
+          <div class="form-group">
+            <label class="form-label" for="inp-goal-target">Target corpus</label>
+            <div class="input-wrapper input-xl">
+              <span class="input-prefix">₹</span>
+              <input type="number" class="form-input has-prefix" id="inp-goal-target" value="100000000" step="10000000" min="0">
+            </div>
+            <div class="quick-lump-chips">
+              <button type="button" class="chip-action chip-goal-quick" data-goal="50000000">₹5 Cr</button>
+              <button type="button" class="chip-action chip-goal-quick" data-goal="100000000">₹10 Cr</button>
+              <button type="button" class="chip-action chip-goal-quick" data-goal="250000000">₹25 Cr</button>
+              <button type="button" class="chip-action chip-goal-quick" data-goal="500000000">₹50 Cr</button>
+              <button type="button" class="chip-action chip-goal-quick" data-goal="1000000000">₹100 Cr</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inp-goal-years">Deadline (years from now)</label>
+            <div class="input-xl"><input type="number" class="form-input" id="inp-goal-years" value="20" min="1" max="60"></div>
+            <div class="goal-current" id="goal-current-corpus">Current plan at year 20: —</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">
+              <label for="inp-goal-return">Blended CAGR to assume</label>
+              <span class="form-val-display val-gold" id="disp-goal-return">23.0%</span>
+            </div>
+            <input type="range" class="range-input range-gold" id="inp-goal-return" min="6" max="40" step="0.5" value="23" aria-label="Blended return assumed when working out the SIP">
+            <div class="range-marks"><span>6%</span><span>40%</span></div>
+            <div class="goal-current"><span id="goal-return-note">Your blended CAGR</span> <button type="button" class="btn-text" id="btn-goal-return-reset" hidden>Back to my CAGR</button> <button type="button" class="btn-text" id="btn-goal-return-apply" hidden>Use in my plan</button></div>
+          </div>
+        </div>
+
+        <div class="course-correction-box">
+          <div class="correction-card">
+            <div class="kpi-title">When your current plan gets there</div>
+            <div class="correction-val val-growth" id="goal-time-to-hit">—</div>
+            <div class="correction-sub" id="goal-time-sub">—</div>
+          </div>
+          <div class="correction-card">
+            <div class="kpi-title" id="goal-sip-title">Monthly SIP to hit it on time</div>
+            <div class="correction-val val-sat" id="goal-required-sip">—</div>
+            <div class="correction-sub" id="goal-sip-sub">—</div>
+          </div>
+          <div class="correction-card">
+            <div class="kpi-title">CAGR needed with current SIP</div>
+            <div class="correction-val val-gold" id="goal-required-rate">—</div>
+            <div class="correction-sub" id="goal-rate-sub">Blended (weighted) annual return, keeping your core–satellite gap</div>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="table-card returns-card">
+        <div class="table-header-tools">
+          <div>
+            <h3 class="table-title">What a different CAGR does</h3>
+            <span class="table-note">Each row keeps your lump sum, SIP, step-up and core–satellite gap and changes only the return. Click a row to use it in the goal above.</span>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="goal-sens-table">
+            <thead><tr><th>Blended CAGR</th><th>Core / satellite</th><th>Portfolio IRR</th><th>Doubles every</th><th id="sens-mult-th">Corpus at year 30</th><th>Goal reached</th><th>SIP for the goal on time</th></tr></thead>
+            <tbody id="goal-sens-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="table-card ladder-card">
+        <div class="table-header-tools">
+          <div>
+            <h3 class="table-title">Doubling ladder</h3>
+            <span class="table-note" id="ladder-note">—</span>
+          </div>
+        </div>
+        <ol class="ladder" id="ladder-strip"></ol>
+        <p class="ladder-foot">Compounding is back-loaded: for a lump sum, each doubling adds more money than all the doublings before it combined.</p>
+      </section>
+
+      <details class="table-card schedule-card" id="schedule-details">
+        <summary>
+          <span><span class="table-title">Year-by-year schedule</span> <span class="table-note inline-note">All 60 years, core and satellite — highlighted row is your horizon</span></span>
+          <span class="summary-hint">Show</span>
+        </summary>
+        <div class="table-header-tools schedule-tools">
+          <div class="table-note">SIPs are treated as invested through the year, so they earn about half a year’s return in the year they go in.</div>
+          <div class="banner-actions">
+            <button class="btn btn-secondary btn-compact" id="btn-export-schedule-csv"><svg class="ico"><use href="#i-download"/></svg> Download CSV</button>
+            <button class="btn btn-secondary btn-compact" id="btn-copy-schedule">Copy table</button>
+          </div>
+        </div>
+        <div class="table-responsive table-scroll-lg">
+          <table class="data-table" id="full-schedule-table">
+            <thead>
+              <tr>
+                <th>Yr</th><th>Self added</th><th>Spouse added</th>
+                <th>Core open</th><th>Core added</th><th>Core growth</th><th>Core close</th>
+                <th>Sat open</th><th>Sat added</th><th>Sat growth</th><th>Sat close</th>
+                <th>Total corpus</th><th>Total invested</th><th>Multiple</th><th id="th-share-final">% of final corpus</th><th>Yrs to next 2x</th>
+              </tr>
+            </thead>
+            <tbody id="full-schedule-tbody"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <!-- =========================================================================
+         TAB 3: ANNUAL REVIEW (per user, stored in the user database)
+         ========================================================================= -->
+    <div class="tab-panel" id="tab-actuals">
+      <div class="review-top">
+        <section class="card user-card">
+          <label class="form-label" for="inp-user-search">Find a user by name or user ID</label>
+          <div class="user-search">
+            <input type="text" class="form-input" id="inp-user-search" list="user-datalist" placeholder="e.g. sekhar or Sekhar" autocomplete="off">
+            <button type="button" class="btn" id="btn-user-load">Open</button>
+          </div>
+          <datalist id="user-datalist"></datalist>
+          <div class="user-search-msg" id="user-search-msg"></div>
+
+          <div class="user-card-body">
+            <div class="user-name" id="review-user-name">—</div>
+            <div class="user-id" id="review-user-id">—</div>
+            <dl class="user-facts">
+              <div><dt>Goal</dt><dd id="review-goal">—</dd></div>
+              <div><dt>Plan started</dt><dd id="review-start">—</dd></div>
+              <div><dt>Years recorded</dt><dd id="review-logged">—</dd></div>
+              <div><dt>Last saved</dt><dd id="review-saved">—</dd></div>
+            </dl>
+          </div>
+          <div class="banner-actions">
+            <button type="button" class="btn-icon" id="btn-review-edit-user">Edit user &amp; goal</button>
+            <button type="button" class="btn-icon" id="btn-review-new-user"><svg class="ico"><use href="#i-plus"/></svg> New user</button>
+          </div>
+        </section>
+
+        <div class="review-cards">
+          <div class="correction-card">
+            <div class="kpi-title" id="cc-revised-title">Projected at goal year</div>
+            <div class="correction-val" id="cc-revised-corpus">—</div>
+            <div class="correction-sub" id="cc-variance-pill">vs goal: <strong id="cc-variance-text">—</strong></div>
+          </div>
+          <div class="correction-card">
+            <div class="kpi-title">Goal reached in</div>
+            <div class="correction-val val-growth" id="cc-time-to-goal">—</div>
+            <div class="correction-sub" id="cc-time-sub">—</div>
+          </div>
+          <div class="correction-card">
+            <div class="kpi-title">Return needed from here on</div>
+            <div class="correction-val val-gold" id="cc-required-rate">—</div>
+            <div class="correction-sub" id="cc-rate-diff">—</div>
+          </div>
+          <div class="correction-card">
+            <div class="kpi-title" id="cc-sip-title">Monthly SIP needed from here on</div>
+            <div class="correction-val val-sat" id="cc-required-sip">—</div>
+            <div class="correction-sub" id="cc-sip-diff">—</div>
+          </div>
+        </div>
+      </div>
+
+      <section class="chart-card review-chart-card">
+        <div class="chart-header">
+          <h2 class="card-title">Plan, actuals and the road to the goal</h2>
+          <div class="chart-legend-html">
+            <span><i class="lg lg-plan"></i>Original plan</span>
+            <span><i class="lg lg-growth"></i>Actual + revised projection</span>
+            <span><i class="lg lg-gold"></i>Goal</span>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="reviewChart" aria-label="Plan versus actual chart"></canvas>
+        </div>
+      </section>
+
+      <section class="table-card">
+        <div class="table-header-tools">
+          <div>
+            <h3 class="table-title">Year-end records</h3>
+            <span class="table-note">For each completed plan year, enter what was actually invested and the portfolio value at year end. The return is worked out for you. Press Save on a row to store it in the database.</span>
+          </div>
+          <div class="banner-actions">
+            <button class="btn" id="btn-add-actual-yr"><svg class="ico"><use href="#i-plus"/></svg> Add next year</button>
+            <button class="btn btn-secondary" id="btn-reset-actuals">Delete all records</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table review-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Planned invested</th>
+                <th>Actual invested</th>
+                <th>Planned value</th>
+                <th>Core value</th>
+                <th>Satellite value</th>
+                <th>Total value</th>
+                <th>Return achieved</th>
+                <th>vs plan</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="actuals-table-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- =========================================================================
+         TAB 4: YOUNGSTER LAB
+         ========================================================================= -->
+    <div class="tab-panel" id="tab-youngsters">
+      <div class="youngster-calc-card">
+        <section class="page-banner">
+          <div>
+            <h2 class="page-title">Start early, end rich</h2>
+            <p class="page-lede">For a young investor, time is the biggest lever. Set an age and a monthly amount to see wealth at 50, 60 and 70 — and what waiting a few years really costs.</p>
+          </div>
+          <div class="banner-stat">
+            <div class="banner-stat-k">Years of compounding to 70</div>
+            <div class="spouse-stat-pill" id="disp-youngster-horizon">49 years</div>
+          </div>
+        </section>
+
+        <section class="card youngster-controls-panel">
+          <div class="youngster-inputs-grid">
+            <div class="form-group">
+              <div class="form-label"><span>Current age</span><span class="form-val-display" id="disp-youngster-age">21 yrs</span></div>
+              <input type="range" class="range-input" id="inp-youngster-age" min="15" max="55" step="1" value="21" aria-label="Current age">
+              <div class="range-marks"><span>15</span><span>55</span></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="inp-youngster-monthly">Monthly investment</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">₹</span>
+                <input type="number" class="form-input has-prefix" id="inp-youngster-monthly" value="10000" step="1000" min="0">
+              </div>
+              <div class="quick-lump-chips quick-youngster-chips">
+                <button type="button" class="chip-action" data-val="5000">₹5k</button>
+                <button type="button" class="chip-action active" data-val="10000">₹10k</button>
+                <button type="button" class="chip-action" data-val="15000">₹15k</button>
+                <button type="button" class="chip-action" data-val="25000">₹25k</button>
+                <button type="button" class="chip-action" data-val="50000">₹50k</button>
+              </div>
+            </div>
+
+            <div class="form-group stepup-group" data-who="youngster">
+              <div class="form-label">
+                <span>Yearly step-up</span>
+                <span class="inline-switch">
+                  <span class="seg-toggle" role="group" aria-label="Step-up as percent or rupees">
+                    <button type="button" class="seg-btn active" data-mode="pct" aria-pressed="true">%</button>
+                    <button type="button" class="seg-btn" data-mode="amt" aria-pressed="false">₹</button>
+                  </span>
+                  <label class="switch switch-sm" title="Turn step-up on or off">
+                    <input type="checkbox" id="inp-youngster-stepup-enable" checked>
+                    <span class="slider-switch"></span>
+                  </label>
+                </span>
+                <input type="hidden" id="inp-youngster-stepup-mode" value="pct">
+              </div>
+              <div class="stepup-pct">
+                <div class="stepup-row">
+                  <input type="range" class="range-input" id="inp-youngster-stepup-pct" min="0" max="25" step="0.5" value="5" aria-label="Yearly step-up percent">
+                  <span class="form-val-display" id="disp-youngster-stepup">5%</span>
+                </div>
+              </div>
+              <div class="stepup-amt" hidden>
+                <div class="input-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input has-prefix" id="inp-youngster-stepup-amt" value="500" step="500" min="0" aria-label="Rupees added to the monthly SIP each year">
+                  <span class="input-suffix">/mo more each year</span>
+                </div>
+              </div>
+              <div class="stepup-equiv" id="eq-youngster-stepup">—</div>
+            </div>
+
+            <div class="form-group" id="group-youngster-stepup-stop">
+              <div class="form-label"><label for="inp-youngster-stepup-stop">Stop stepping up after</label><span class="form-val-display" id="disp-youngster-stepup-stop">10 yrs</span></div>
+              <div class="year-stepper">
+                <button type="button" class="step-btn" data-target="inp-youngster-stepup-stop" data-delta="-1" aria-label="One year less">−</button>
+                <input type="range" class="range-input" id="inp-youngster-stepup-stop" min="1" max="49" step="1" value="10" aria-label="Years of step-up">
+                <button type="button" class="step-btn" data-target="inp-youngster-stepup-stop" data-delta="1" aria-label="One year more">+</button>
+              </div>
+              <div class="form-help" id="help-youngster-stepup-stop">After this the SIP stays flat</div>
+            </div>
+
+            <div class="form-group" id="group-youngster-add-stop">
+              <div class="form-label"><label for="inp-youngster-add-stop">Stop investing after</label><span class="form-val-display" id="disp-youngster-add-stop">10 yrs</span></div>
+              <div class="year-stepper">
+                <button type="button" class="step-btn" data-target="inp-youngster-add-stop" data-delta="-1" aria-label="One year less">−</button>
+                <input type="range" class="range-input" id="inp-youngster-add-stop" min="1" max="49" step="1" value="10" aria-label="Years of investing">
+                <button type="button" class="step-btn" data-target="inp-youngster-add-stop" data-delta="1" aria-label="One year more">+</button>
+                <select class="form-select select-mini" id="inp-youngster-add-stop-months" aria-label="Extra months of investing"><option value="0">+0 mo</option><option value="1">+1 mo</option><option value="2">+2 mo</option><option value="3">+3 mo</option><option value="4">+4 mo</option><option value="5">+5 mo</option><option value="6">+6 mo</option><option value="7">+7 mo</option><option value="8">+8 mo</option><option value="9">+9 mo</option><option value="10">+10 mo</option><option value="11">+11 mo</option></select>
+              </div>
+              <div class="form-help" id="help-youngster-add-stop">The corpus keeps compounding to 70</div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label"><span>Core allocation</span><span class="form-val-display" id="disp-youngster-alloc">70%</span></div>
+              <input type="range" class="range-input" id="inp-youngster-alloc" min="0" max="100" step="5" value="70" aria-label="Core allocation percent">
+              <div class="alloc-track young-alloc-track"><div class="alloc-segment-core" id="young-core-seg" style="width:70%"></div><div class="alloc-segment-sat" id="young-sat-seg" style="width:30%"></div></div>
+              <div class="form-help" id="help-youngster-return">—</div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label"><span>Core CAGR</span><span class="form-val-display val-core" id="disp-youngster-core-ret">17.0%</span></div>
+              <input type="range" class="range-input range-core" id="inp-youngster-core-ret" min="8" max="32" step="0.5" value="17" aria-label="Core expected return">
+              <div class="range-marks"><span>8%</span><span>32%</span></div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label"><span>Satellite CAGR</span><span class="form-val-display val-sat" id="disp-youngster-sat-ret">27.0%</span></div>
+              <input type="range" class="range-input range-sat" id="inp-youngster-sat-ret" min="15" max="45" step="0.5" value="27" aria-label="Satellite expected return">
+              <div class="range-marks"><span>15%</span><span>45%</span></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="kpi-grid youngster-kpi-grid">
+          <div class="kpi-card age-card">
+            <div class="kpi-title">At age 50</div>
+            <div class="kpi-value val-sat" id="ykpi-corpus-50">—</div>
+            <div class="kpi-sub"><span id="ykpi-corpus-50-exact">—</span> <span class="mult" id="ykpi-mult-50"></span></div>
+          </div>
+          <div class="kpi-card age-card">
+            <div class="kpi-title">At age 60</div>
+            <div class="kpi-value val-gold" id="ykpi-corpus-60">—</div>
+            <div class="kpi-sub"><span id="ykpi-corpus-60-exact">—</span> <span class="mult" id="ykpi-mult-60"></span></div>
+          </div>
+          <div class="kpi-card age-card age-card-final">
+            <div class="kpi-title">At age 70</div>
+            <div class="kpi-value val-growth" id="ykpi-corpus">—</div>
+            <div class="kpi-sub"><span id="ykpi-corpus-exact">—</span> <span class="mult" id="ykpi-mult-70"></span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Total invested</div>
+            <div class="kpi-value" id="ykpi-invested">—</div>
+            <div class="kpi-sub" id="ykpi-invested-sub">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Made by compounding</div>
+            <div class="kpi-value" id="ykpi-gain">—</div>
+            <div class="kpi-sub"><span id="ykpi-gain-share">—</span> · <span id="ykpi-multiple">—</span> <span id="ykpi-multiple-sub" hidden></span></div>
+          </div>
+          <div class="kpi-card kpi-accent-rose">
+            <div class="kpi-title">Cost of waiting 3 years</div>
+            <div class="kpi-value val-rose" id="ykpi-delay-5">—</div>
+            <div class="kpi-sub" id="ykpi-delay-5-loss">—</div>
+          </div>
+        </div>
+
+        <div class="young-bottom">
+          <section class="cost-of-delay-section">
+            <div class="section-head">
+              <h3 class="section-title">What waiting costs</h3>
+              <p class="section-note">Same monthly amount and step-up, started 3, 6 or 9 years later. Loss is measured at age 70 against starting today at <strong>age <span id="disp-delay-current-age">21</span></strong>.</p>
+            </div>
+            <div class="youngster-grid" id="youngster-comparison-cards"></div>
+          </section>
+
+          <section class="table-card rule72-widget">
+            <h3 class="table-title">How fast money doubles</h3>
+            <table class="data-table mini-table">
+              <thead><tr><th>Investment</th><th>Return</th><th>Doubles every</th><th>₹1 L in 30 yrs</th></tr></thead>
+              <tbody id="young-doubling-tbody"></tbody>
+            </table>
+            <p class="table-note" id="young-doubling-note">—</p>
+          </section>
+        </div>
+
+        <details class="table-card youngster-timeline-card" id="youngster-timeline-details">
+          <summary>
+            <span class="table-title">Year-by-year table, age <span id="disp-timeline-start-age">21</span> to 70</span>
+            <span class="summary-hint">Show</span>
+          </summary>
+          <div class="table-responsive table-scroll">
+            <table class="data-table" id="youngster-timeline-table">
+              <thead>
+                <tr><th>Age</th><th>Year</th><th>Monthly SIP</th><th>Invested this year</th><th>Growth this year</th><th>Total invested</th><th>Wealth</th><th>Multiple</th></tr>
+              </thead>
+              <tbody id="youngster-timeline-tbody"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      Compounding Calculator v<span data-app="version">1.11</span> (<span data-app="date">24 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
+    </footer>
+  </div>
+
+  <!-- Modal: New user -->
+  <div class="modal-overlay" id="modal-new-profile">
+    <div class="modal-box modal-wide" role="dialog" aria-labelledby="mnp-title">
+      <div class="modal-header">
+        <h3 id="mnp-title">New user</h3>
+        <button class="modal-close-btn" data-close="modal-new-profile" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="new-user-name">Name</label>
+            <input type="text" class="form-input" id="new-user-name" placeholder="e.g. Sekhar" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-user-id">User ID</label>
+            <input type="text" class="form-input" id="new-user-id" placeholder="e.g. sekhar" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="form-msg" id="new-user-msg"></div>
+        <fieldset class="modal-fieldset">
+          <legend>Goal</legend>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="new-user-goal-target">Target corpus</label>
+              <div class="input-wrapper"><span class="input-prefix">₹</span><input type="number" class="form-input has-prefix" id="new-user-goal-target" value="100000000" step="10000000" min="0"></div>
+              <div class="quick-lump-chips"><button type="button" class="chip-action" data-goal-for="new-user" data-goal="50000000">₹5 Cr</button><button type="button" class="chip-action" data-goal-for="new-user" data-goal="100000000">₹10 Cr</button><button type="button" class="chip-action" data-goal-for="new-user" data-goal="250000000">₹25 Cr</button><button type="button" class="chip-action" data-goal-for="new-user" data-goal="500000000">₹50 Cr</button><button type="button" class="chip-action" data-goal-for="new-user" data-goal="1000000000">₹100 Cr</button></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="new-user-goal-years">In how many years</label>
+              <input type="number" class="form-input" id="new-user-goal-years" value="20" min="1" max="60">
+            </div>
+          </div>
+          <div class="form-group form-group-last">
+            <label class="form-label" for="new-user-start-year">Plan started in (year 1 begins)</label>
+            <input type="number" class="form-input input-narrow" id="new-user-start-year" min="1980" max="2100" step="1">
+          </div>
+        </fieldset>
+        <div class="form-group form-group-last" style="margin-top:12px">
+          <label class="form-label" for="new-profile-template-select">Start the plan from</label>
+          <select class="form-select" id="new-profile-template-select">
+            <option value="current">Current inputs</option>
+            <option value="default">Standard plan (₹1L + ₹10k SIP, 15% / 25%)</option>
+          </select>
+        </div>
+        <input type="hidden" id="new-profile-name-input">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-new-profile">Cancel</button>
+        <button class="btn" id="btn-confirm-create-profile">Create user</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit user -->
+  <div class="modal-overlay" id="modal-edit-user">
+    <div class="modal-box modal-wide" role="dialog" aria-labelledby="meu-title">
+      <div class="modal-header">
+        <h3 id="meu-title">Edit user &amp; goal</h3>
+        <button class="modal-close-btn" data-close="modal-edit-user" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="edit-user-name">Name</label>
+            <input type="text" class="form-input" id="edit-user-name" placeholder="e.g. Sekhar" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-user-id">User ID</label>
+            <input type="text" class="form-input" id="edit-user-id" placeholder="e.g. sekhar" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="form-msg" id="edit-user-msg"></div>
+        <fieldset class="modal-fieldset">
+          <legend>Goal</legend>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-user-goal-target">Target corpus</label>
+              <div class="input-wrapper"><span class="input-prefix">₹</span><input type="number" class="form-input has-prefix" id="edit-user-goal-target" value="100000000" step="10000000" min="0"></div>
+              <div class="quick-lump-chips"><button type="button" class="chip-action" data-goal-for="edit-user" data-goal="50000000">₹5 Cr</button><button type="button" class="chip-action" data-goal-for="edit-user" data-goal="100000000">₹10 Cr</button><button type="button" class="chip-action" data-goal-for="edit-user" data-goal="250000000">₹25 Cr</button><button type="button" class="chip-action" data-goal-for="edit-user" data-goal="500000000">₹50 Cr</button><button type="button" class="chip-action" data-goal-for="edit-user" data-goal="1000000000">₹100 Cr</button></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-user-goal-years">In how many years</label>
+              <input type="number" class="form-input" id="edit-user-goal-years" value="20" min="1" max="60">
+            </div>
+          </div>
+          <div class="form-group form-group-last">
+            <label class="form-label" for="edit-user-start-year">Plan started in (year 1 begins)</label>
+            <input type="number" class="form-input input-narrow" id="edit-user-start-year" min="1980" max="2100" step="1">
+          </div>
+        </fieldset>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-edit-user">Cancel</button>
+        <button class="btn" id="btn-confirm-edit-user">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Users & database -->
+  <div class="modal-overlay" id="modal-manage-profiles">
+    <div class="modal-box modal-wide" role="dialog" aria-labelledby="mmp-title">
+      <div class="modal-header">
+        <h3 id="mmp-title">Users &amp; database</h3>
+        <button class="modal-close-btn" data-close="modal-manage-profiles" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <section class="db-panel">
+          <div class="db-panel-text">
+            <strong>Database file</strong>
+            <span id="db-panel-status">Not linked. Users are saved in this browser only.</span>
+          </div>
+          <div class="db-panel-actions">
+            <button class="btn-icon" id="btn-db-create">Create database file…</button>
+            <button class="btn-icon" id="btn-db-open">Open database file…</button>
+            <button class="btn-icon" id="btn-db-reconnect" hidden>Reconnect</button>
+            <button class="btn-icon" id="btn-db-unlink" hidden>Unlink</button>
+          </div>
+          <div class="db-choices">
+            <div>
+              <strong>On this PC only (no cloud)</strong>
+              <span>Save the file in a local folder outside OneDrive — the installer creates <code>Compounding Calculator Data</code> in your user folder (C:\Users\<em>you</em>) for this. Nothing leaves your computer.</span>
+            </div>
+            <div>
+              <strong>Synced (optional)</strong>
+              <span>Save it in your OneDrive folder instead to use the same users on another PC.</span>
+            </div>
+          </div>
+          <p class="modal-note">Either way the file is rewritten automatically after every change and survives browser resets. Without a file, users stay in this browser only — use Export to back them up.</p>
+        </section>
+        <div class="form-group">
+          <input type="text" class="form-input" id="inp-manage-filter" placeholder="Filter by name or user ID" autocomplete="off">
+        </div>
+        <div id="profiles-list-container"></div>
+        <div class="modal-tools">
+          <button class="btn btn-secondary" id="btn-export-profiles-json">Export all users (JSON)</button>
+          <label class="btn btn-secondary">
+            Import users (JSON)
+            <input type="file" id="inp-import-profiles-json" accept=".json" hidden>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-manage-profiles">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: About -->
+  <div class="modal-overlay" id="modal-about">
+    <div class="modal-box" role="dialog" aria-labelledby="mab-title">
+      <div class="modal-header">
+        <h3 id="mab-title">Compounding Calculator</h3>
+        <button class="modal-close-btn" data-close="modal-about" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body about-body">
+        <div class="about-version">Version <strong data-app="version">1.11</strong> <span class="c-muted">· released <span data-app="date">24 Oct 2026</span></span></div>
+        <dl class="about-facts">
+          <div><dt>Developed by</dt><dd data-app="developer">Sathiya Sekhar E</dd></div>
+          <div><dt>For</dt><dd data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</dd></div>
+        </dl>
+        <h4 class="about-h">Version history</h4>
+        <ol class="about-history" id="about-history"></ol>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close="modal-about">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Print -->
+  <div class="modal-overlay" id="modal-print-options">
+    <div class="modal-box" role="dialog" aria-labelledby="mpo-title">
+      <div class="modal-header">
+        <h3 id="mpo-title">Print or save as PDF</h3>
+        <button class="modal-close-btn" data-close="modal-print-options" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-note">Choose a report, then pick “Save as PDF” in the print dialog. Turn on “Background graphics” for colours.</p>
+        <label class="radio-card">
+          <input type="radio" name="print-report-type" value="summary" checked>
+          <span><strong>Summary (1 page)</strong><br>Plan assumptions, headline numbers, growth chart and doubling milestones.</span>
+        </label>
+        <label class="radio-card">
+          <input type="radio" name="print-report-type" value="full">
+          <span><strong>Summary + 60-year schedule</strong><br>Adds the full year-by-year table, with headers repeated on every page.</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-print-options">Cancel</button>
+        <button class="btn" id="btn-trigger-print">Open print dialog</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Help / manuals -->
+  <div class="modal-overlay" id="modal-help">
+    <div class="modal-box modal-manual" role="dialog" aria-labelledby="mhelp-title">
+      <div class="modal-header manual-header">
+        <h3 id="mhelp-title">Help</h3>
+        <div class="manual-switch" role="tablist" aria-label="Manual">
+          <button type="button" class="manual-switch-btn active" data-manual="user-manual" role="tab" aria-selected="true">User manual</button>
+          <button type="button" class="manual-switch-btn" data-manual="design-manual" role="tab" aria-selected="false">Design manual</button>
+        </div>
+        <span class="manual-spacer"></span>
+        <button type="button" class="btn-text" id="btn-help-this-page">Help for this page</button>
+        <a class="btn-text" id="lnk-help-newwin" href="manual/user-manual.html" target="_blank" rel="noopener">Open in a new window</a>
+        <a class="btn-text" id="lnk-help-pdf" href="manual/Compounding-Calculator-User-Manual.pdf" target="_blank" rel="noopener">PDF</a>
+        <button class="modal-close-btn" data-close="modal-help" aria-label="Close">&times;</button>
+      </div>
+      <iframe class="manual-frame" id="manual-frame" title="Compounding Calculator manual" src="about:blank"></iframe>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="calculator.js?v=1.11"></script>
+  <script src="app.js?v=1.11"></script>
+</body>
+</html>

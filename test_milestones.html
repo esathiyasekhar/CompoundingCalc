@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="calculator.js"></script>
+</head>
+<body>
+  <div id="results"></div>
+  <script>
+    const CE = window.CompoundingEngine;
+    const res = CE.calculateYoungsterWealth({
+      currentAge: 21,
+      targetAge: 70,
+      monthly: 10000,
+      stepUpEnabled: true,
+      stepUpPct: 10,
+      stepUpStopYears: 10,
+      additionsStopYears: 999,
+      rate: 20
+    });
+
+    const out = {
+      currentAge: res.currentAge,
+      corpusAt50: res.corpusAt50,
+      corpusAt50Formatted: CE.formatINR(res.corpusAt50, { compact: true, decimals: 2 }),
+      multipleAt50: res.multipleAt50.toFixed(1) + 'x',
+      corpusAt60: res.corpusAt60,
+      corpusAt60Formatted: CE.formatINR(res.corpusAt60, { compact: true, decimals: 2 }),
+      multipleAt60: res.multipleAt60.toFixed(1) + 'x',
+      corpusAt70: res.corpusAt70,
+      corpusAt70Formatted: CE.formatINR(res.corpusAt70, { compact: true, decimals: 2 }),
+      multipleAt70: res.multipleAt70.toFixed(1) + 'x',
+      delayCount: res.delayScenarios.length,
+      delay0_50: CE.formatINR(res.delayScenarios[0].corpusAt50, { compact: true, decimals: 2 }),
+      delay0_60: CE.formatINR(res.delayScenarios[0].corpusAt60, { compact: true, decimals: 2 }),
+      delay0_70: CE.formatINR(res.delayScenarios[0].corpusAt70, { compact: true, decimals: 2 })
+    };
+
+    document.getElementById('results').textContent = JSON.stringify(out, null, 2);
+    console.log(out);
+  </script>
+</body>
+</html>
