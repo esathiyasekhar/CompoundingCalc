@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="app-version" content="1.13">
+  <meta name="app-version" content="1.14">
   <title>Compounding Calculator — Core + Satellite</title>
   <meta name="description" content="Core + Satellite compounding calculator: projected corpus, IRR, doubling milestones, spouse contributions, goal planning, annual course-correction and a youngster cost-of-delay lab.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.13">
+  <link rel="stylesheet" href="styles.css?v=1.14">
 </head>
 <body>
 
@@ -46,7 +46,7 @@
         </div>
         <div class="brand-titles">
           <h1>Compounding</h1>
-          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.13</span></button></div>
+          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.14</span></button></div>
         </div>
       </div>
 
@@ -96,7 +96,7 @@
           <div>Investor: <strong id="print-user-name">Sekhar</strong></div>
           <div>Date: <strong id="print-report-date">—</strong></div>
           <div>Horizon: <strong id="print-report-horizon">30 Years</strong></div>
-          <div>Version <strong data-app="version">1.13</strong></div>
+          <div>Version <strong data-app="version">1.14</strong></div>
         </div>
       </div>
       <div class="print-assumptions" id="print-assumptions"></div>
@@ -114,8 +114,12 @@
         <p class="header-quote-pill" title="Popularly attributed to Albert Einstein; no record shows he said it">“Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn’t, pays it.” <span class="quote-by">— Albert Einstein</span></p>
         <div class="infl-group" role="group" aria-label="Inflation">
           <label class="infl-label" for="inp-inflation">Inflation</label>
-          <span class="infl-input"><input type="number" class="form-input" id="inp-inflation" value="6" min="0" max="15" step="0.5" aria-label="Inflation, percent a year"><span aria-hidden="true">%</span></span>
-          <button type="button" class="btn-icon btn-compact" id="btn-real-view" aria-pressed="false" title="Show every future amount in today’s rupees, after inflation">Today’s ₹</button>
+          <span class="infl-input">
+            <button type="button" class="infl-step" data-infl-step="-0.5" aria-label="Inflation 0.5% lower">−</button>
+            <input type="number" class="form-input" id="inp-inflation" value="6" min="0" max="15" step="0.5" aria-label="Inflation, percent a year"><span aria-hidden="true">%</span>
+            <button type="button" class="infl-step" data-infl-step="0.5" aria-label="Inflation 0.5% higher">+</button>
+          </span>
+          <button type="button" class="btn-icon btn-compact" id="btn-real-view" aria-pressed="false" title="INF_ADJ: show every future amount in today’s rupees, after inflation">INF_ADJ OFF</button>
         </div>
         <div class="preset-wrap">
           <button type="button" class="btn-icon btn-compact" id="btn-presets" aria-haspopup="menu" aria-expanded="false" aria-controls="preset-menu" title="Ready-made demonstrations">
@@ -143,8 +147,12 @@
 
     <!-- Today's rupees: shown while the inflation-adjusted view is on -->
     <div class="real-note" id="real-note" role="status" hidden>
-      <p><strong>Today’s rupees.</strong> Every future amount is divided by <span id="real-note-rate">6%</span> inflation a year, so it shows what the money would buy now, and returns are real returns. The Annual review stays in actual rupees.</p>
-      <button type="button" class="btn-icon btn-compact" id="btn-real-off">Show actual ₹</button>
+      <p><strong>INF_ADJ ON · today’s rupees.</strong> Every future amount is divided by <span id="real-note-rate">6%</span> inflation a year and returns are real. The Annual review stays in actual rupees.</p>
+      <div class="infl-quick" role="group" aria-label="Inflation rate">
+        <input type="range" class="range-input range-gold" id="inp-inflation-slider" min="0" max="12" step="0.5" value="6" aria-label="Inflation, percent a year">
+        <span class="infl-chips"><button type="button" class="chip-action" data-infl="4">4%</button><button type="button" class="chip-action" data-infl="5">5%</button><button type="button" class="chip-action" data-infl="6">6%</button><button type="button" class="chip-action" data-infl="7">7%</button><button type="button" class="chip-action" data-infl="8">8%</button></span>
+      </div>
+      <button type="button" class="btn-icon btn-compact" id="btn-real-off">INF_ADJ OFF</button>
     </div>
 
     <!-- =========================================================================
@@ -544,7 +552,10 @@
               </label>
               <label for="inp-goal-inflation" class="goal-infl-label">Target in today’s money (inflation-adjusted)</label>
             </div>
-            <div class="goal-current" id="goal-infl-note" hidden>—</div>
+            <div class="goal-current goal-infl-row" id="goal-infl-row" hidden>
+              <span id="goal-infl-note">—</span>
+              <span class="infl-chips"><button type="button" class="chip-action" data-infl="4">4%</button><button type="button" class="chip-action" data-infl="5">5%</button><button type="button" class="chip-action" data-infl="6">6%</button><button type="button" class="chip-action" data-infl="7">7%</button><button type="button" class="chip-action" data-infl="8">8%</button></span>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="inp-goal-years">Deadline (years from now)</label>
@@ -846,16 +857,19 @@
               <div class="form-help" id="help-youngster-return">—</div>
             </div>
 
-            <div class="form-group">
-              <div class="form-label"><span>Core CAGR</span><span class="form-val-display val-core" id="disp-youngster-core-ret">17.0%</span></div>
-              <input type="range" class="range-input range-core" id="inp-youngster-core-ret" min="8" max="32" step="0.5" value="17" aria-label="Core expected return">
-              <div class="range-marks"><span>8%</span><span>32%</span></div>
-            </div>
-
-            <div class="form-group">
-              <div class="form-label"><span>Satellite CAGR</span><span class="form-val-display val-sat" id="disp-youngster-sat-ret">27.0%</span></div>
-              <input type="range" class="range-input range-sat" id="inp-youngster-sat-ret" min="15" max="45" step="0.5" value="27" aria-label="Satellite expected return">
-              <div class="range-marks"><span>15%</span><span>45%</span></div>
+            <div class="form-group young-rates">
+              <div class="form-grid-2">
+                <div>
+                  <div class="form-label"><span>Core CAGR</span><span class="form-val-display val-core" id="disp-youngster-core-ret">17.0%</span></div>
+                  <input type="range" class="range-input range-core" id="inp-youngster-core-ret" min="8" max="32" step="0.5" value="17" aria-label="Core expected return">
+                  <div class="range-marks"><span>8%</span><span>32%</span></div>
+                </div>
+                <div>
+                  <div class="form-label"><span>Satellite CAGR</span><span class="form-val-display val-sat" id="disp-youngster-sat-ret">27.0%</span></div>
+                  <input type="range" class="range-input range-sat" id="inp-youngster-sat-ret" min="15" max="45" step="0.5" value="27" aria-label="Satellite expected return">
+                  <div class="range-marks"><span>15%</span><span>45%</span></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -948,7 +962,7 @@
     </div>
 
     <footer class="app-footer">
-      Compounding Calculator v<span data-app="version">1.13</span> (<span data-app="date">29 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
+      Compounding Calculator v<span data-app="version">1.14</span> (<span data-app="date">29 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
     </footer>
   </div>
 
@@ -1107,7 +1121,7 @@
         <button class="modal-close-btn" data-close="modal-about" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body about-body">
-        <div class="about-version">Version <strong data-app="version">1.13</strong> <span class="c-muted">· released <span data-app="date">29 Oct 2026</span></span></div>
+        <div class="about-version">Version <strong data-app="version">1.14</strong> <span class="c-muted">· released <span data-app="date">29 Oct 2026</span></span></div>
         <dl class="about-facts">
           <div><dt>Developed by</dt><dd data-app="developer">Sathiya Sekhar E</dd></div>
           <div><dt>For</dt><dd data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</dd></div>
@@ -1167,7 +1181,7 @@
 
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <script src="calculator.js?v=1.13"></script>
-  <script src="app.js?v=1.13"></script>
+  <script src="calculator.js?v=1.14"></script>
+  <script src="app.js?v=1.14"></script>
 </body>
 </html>

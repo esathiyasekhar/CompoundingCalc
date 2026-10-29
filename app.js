@@ -287,11 +287,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.13',
+    version: '1.14',
     date: '2026-10-29',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.14', date: '2026-10-29', notes: [
+        'Inflation view button renamed INF_ADJ ON / OFF',
+        'More ways to set inflation: − / + in the tab bar, a slider and 4–8% chips in the INF_ADJ strip, chips beside the inflation-adjusted goal',
+        'Youngster lab control panel compacted to two rows, with Core and Satellite CAGR side by side'
+      ] },
       { version: '1.13', date: '2026-10-29', notes: [
         'Inflation rate in the tab bar (default 6%) and a Today’s ₹ button that shows every page in today’s rupees, with real returns',
         'Goal: “Target in today’s money” switch for an inflation-adjusted freedom number (saved with the user)',
@@ -903,8 +908,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const cr = (v) => CE.formatINR(v, { compact: true, decimals: 2 });
 
     const inflNote = document.getElementById('goal-infl-note');
+    const inflRow = document.getElementById('goal-infl-row');
+    if (inflRow) inflRow.hidden = !goalInfl;
     if (inflNote) {
-      inflNote.hidden = !goalInfl;
       if (goalInfl) inflNote.innerHTML = `${cr(target)} today = <strong>${cr(target * Math.pow(1 + inf, years))}</strong> in year ${years} at ${fmtPct(inf)} inflation.`;
     }
     if (els.goalCurrentCorpus) {
@@ -2143,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', function () {
         note: 'The same ₹3 Cr, but in today’s money: it grows with the inflation rate in the tab bar, so freedom comes later. The note under the target shows what ₹3 Cr becomes by 60; the SIP card shows the monthly top-up that still gets there on time.' },
       { id: 'ten-lakh-real', title: '₹10 L at 18% for 30 years · in today’s ₹', sub: 'Same as above, after inflation', tab: 'tab-core', real: true,
         core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 30, selfLump: 1000000 }),
-        note: 'The same ₹10 lakh at 18%, shown in today’s rupees: what the corpus would buy now after inflation, and the real return. Press “Show actual ₹” to switch back.' }
+        note: 'The same ₹10 lakh at 18%, shown in today’s rupees: what the corpus would buy now after inflation, and the real return. Press INF_ADJ OFF to switch back.' }
     ] }
   ];
   const PRESET_LIST = [];
@@ -2262,7 +2268,10 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderInflationState() {
     document.body.classList.toggle('is-real', !!state.realView);
     const b = document.getElementById('btn-real-view');
-    if (b) b.setAttribute('aria-pressed', state.realView ? 'true' : 'false');
+    if (b) { b.setAttribute('aria-pressed', state.realView ? 'true' : 'false'); b.textContent = state.realView ? 'INF_ADJ ON' : 'INF_ADJ OFF'; }
+    const sl = document.getElementById('inp-inflation-slider');
+    if (sl && document.activeElement !== sl) sl.value = Math.min(12, state.inflation);
+    document.querySelectorAll('[data-infl]').forEach(c => c.classList.toggle('active', parseFloat(c.getAttribute('data-infl')) === Number(state.inflation)));
     const n = document.getElementById('real-note');
     if (n) n.hidden = !state.realView;
     const r = document.getElementById('real-note-rate');
@@ -2277,16 +2286,22 @@ document.addEventListener('DOMContentLoaded', function () {
     try { localStorage.setItem('compounding_calculator_real_view', on ? '1' : '0'); } catch (e) { /* ignore */ }
     refreshAllPages();
   }
+  function setInflation(v) {
+    if (isNaN(v)) return;
+    state.inflation = Math.round(Math.max(0, Math.min(15, v)) * 10) / 10;
+    try { localStorage.setItem('compounding_calculator_inflation', String(state.inflation)); } catch (e) { /* ignore */ }
+    refreshAllPages();
+  }
   if (els.inpInflation) {
-    els.inpInflation.addEventListener('input', () => {
-      const v = parseFloat(els.inpInflation.value);
-      if (isNaN(v)) return;
-      state.inflation = Math.max(0, Math.min(15, v));
-      try { localStorage.setItem('compounding_calculator_inflation', String(state.inflation)); } catch (e) { /* ignore */ }
-      refreshAllPages();
-    });
+    els.inpInflation.addEventListener('input', () => setInflation(parseFloat(els.inpInflation.value)));
     els.inpInflation.addEventListener('change', () => { els.inpInflation.value = state.inflation; });
   }
+  // Other ways to set the rate: −/+ in the tab bar, the slider and quick chips in the INF_ADJ strip and on the goal
+  document.querySelectorAll('[data-infl-step]').forEach(b => b.addEventListener('click', () =>
+    setInflation(Number(state.inflation) + parseFloat(b.getAttribute('data-infl-step')))));
+  document.querySelectorAll('[data-infl]').forEach(b => b.addEventListener('click', () => setInflation(parseFloat(b.getAttribute('data-infl')))));
+  const inflSlider = document.getElementById('inp-inflation-slider');
+  if (inflSlider) inflSlider.addEventListener('input', () => setInflation(parseFloat(inflSlider.value)));
   bindClick('btn-real-view', () => setRealView(!state.realView));
   bindClick('btn-real-off', () => setRealView(false));
   if (els.goalInflation) els.goalInflation.addEventListener('change', updateAll);

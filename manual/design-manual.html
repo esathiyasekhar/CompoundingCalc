@@ -7,15 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="manual.css?v=1.13">
-<script src="manual.js?v=1.13"></script>
+<link rel="stylesheet" href="manual.css?v=1.14">
+<script src="manual.js?v=1.14"></script>
 </head>
 <body>
 <div class="manual">
 
 <nav class="toc" aria-label="Contents">
   <p class="toc-title">Design manual</p>
-  <p class="toc-sub">Compounding Calculator v1.13</p>
+  <p class="toc-sub">Compounding Calculator v1.14</p>
   <ol>
     <li><a href="#purpose">Purpose and principles</a></li>
     <li><a href="#architecture">Architecture</a></li>
@@ -53,7 +53,7 @@
     <h1>Compounding <span>Calculator</span></h1>
     <p class="cover-lede">How the calculator is built: the files, every formula and solver, the data model, the visual system, the Windows installer and the web edition.</p>
     <ul class="cover-meta">
-      <li>Version <strong>1.13</strong></li>
+      <li>Version <strong>1.14</strong></li>
       <li>Released <strong>29 Oct 2026</strong></li>
       <li>Developed by <strong>Sathiya Sekhar E</strong></li>
     </ul>
@@ -93,6 +93,7 @@
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
       <tbody>
+        <tr><td><b>1.14</b></td><td class="nowrap">29 Oct 2026</td><td>Today’s ₹ button renamed INF_ADJ ON / OFF; inflation set with −/+, a slider and 4–8% chips as well as typing; Youngster control panel compacted to two rows of four.</td></tr>
         <tr><td><b>1.13</b></td><td class="nowrap">29 Oct 2026</td><td>Inflation rate in the tab bar (default 6%); Today’s ₹ view that deflates every page and shows real returns; “Target in today’s money” goal switch saved with the user; Youngster horizons set on the cards with one control that moves all three; Youngster age from 0 (default 20); step-up 10% and SIP 10 years as defaults; presets renamed, 22 in all, with two inflation presets.</td></tr>
         <tr><td><b>1.12</b></td><td class="nowrap">29 Oct 2026</td><td>Presets menu (19 demonstrations in four groups) with a presenter note and Previous / Next; plan pages leave year-end records out while a preset is shown; Youngster lab lump sum, three chosen ages up to 100 and waiting steps of 3, 5 or 10 years; CAGR table rates 12–30% including 23% and 26%; phone layout fix for the waiting cards.</td></tr>
         <tr><td><b>1.11</b></td><td class="nowrap">24 Oct 2026</td><td>Help button with the User manual and Design manual inside the app (opens at the current page, <kbd>F1</kbd>); manuals as PDF; storage pill no longer clips “• unsaved”; version stamps on file addresses so browsers never mix old and new files.</td></tr>
@@ -143,7 +144,7 @@
     </div>
     <p>Every input fires <code>updateAll()</code>, which builds the parameter object, calls the engine with the user's year-end records (<code>planActuals()</code>: <code>state.actualsHistory</code>, or none while a preset is shown), and redraws the Core engine, Goal &amp; schedule, Annual review and spouse comparison. The Youngster lab has its own <code>updateYoungsterLab()</code>. The goal, comparison and review solvers rerun the full schedule a few hundred times per update, which is still instant.</p>
     <h3>Presets</h3>
-    <p>A preset is data, not code: <code>applyPreset(id)</code> saves the current inputs for <i>Undo</i>, writes the preset's Core engine, goal and Youngster inputs into the form, sets <code>state.presetId</code>, opens its page and shows the presenter note. While <code>state.presetId</code> is set, <code>planActuals()</code> returns no records, so demonstrations are not mixed with the selected user's history; closing the note, Reset page or opening a user clears it. A preset also sets the Today’s ₹ view (<code>real: true</code> turns it on; otherwise off) and, for goal presets, the goal’s inflation switch (<code>goal.inflationAdjusted</code>). Presets never save anything.</p>
+    <p>A preset is data, not code: <code>applyPreset(id)</code> saves the current inputs for <i>Undo</i>, writes the preset's Core engine, goal and Youngster inputs into the form, sets <code>state.presetId</code>, opens its page and shows the presenter note. While <code>state.presetId</code> is set, <code>planActuals()</code> returns no records, so demonstrations are not mixed with the selected user's history; closing the note, Reset page or opening a user clears it. A preset also sets the INF_ADJ view (today’s rupees) (<code>real: true</code> turns it on; otherwise off) and, for goal presets, the goal’s inflation switch (<code>goal.inflationAdjusted</code>). Presets never save anything.</p>
     <h3>Engine functions</h3>
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Function</th><th>Returns</th></tr></thead>
@@ -243,9 +244,9 @@ growth_r = close_r − open_r − added_r            <span class="cm">so every r
 invested_r = lump + Σ added_r
 IRR flows: cf / D(t)   ⇒   real IRR = (1 + IRR) / (1 + i) − 1   <span class="cm">exactly</span>
 blended CAGR shown = (1 + c·r_c + s·r_s) / (1 + i) − 1</div>
-    <p>Doubling times, milestones and the 25 / 50 / 75% markers are then computed from the real series, so they are real too. <code>calculateYoungsterWealth</code> does the same with <code>realInflation</code> and a <code>yearOffset</code> (a delayed start of <i>d</i> years is deflated from today, not from its own start). The app passes <code>realInflation</code> only when the Today’s ₹ view is on; the Annual review always runs nominal.</p>
+    <p>Doubling times, milestones and the 25 / 50 / 75% markers are then computed from the real series, so they are real too. <code>calculateYoungsterWealth</code> does the same with <code>realInflation</code> and a <code>yearOffset</code> (a delayed start of <i>d</i> years is deflated from today, not from its own start). The app passes <code>realInflation</code> only when the INF_ADJ view (today’s rupees) is on; the Annual review always runs nominal.</p>
     <h3>Inflation-adjusted goal</h3>
-    <p>With “Target in today’s money” on, the goal solvers run on the plan in today’s rupees (<code>realInflation</code> = <i>i</i>), so the target is compared with real wealth at every year. This is the same as growing the target with inflation, and it gives the year, SIP and CAGR for an inflation-adjusted freedom number. Displayed corpus values still follow the Today’s ₹ view. The Annual review compares actual values with the target grown to the deadline: target × (1 + i)^years.</p>
+    <p>With “Target in today’s money” on, the goal solvers run on the plan in today’s rupees (<code>realInflation</code> = <i>i</i>), so the target is compared with real wealth at every year. This is the same as growing the target with inflation, and it gives the year, SIP and CAGR for an inflation-adjusted freedom number. Displayed corpus values still follow the INF_ADJ view (today’s rupees). The Annual review compares actual values with the target grown to the deadline: target × (1 + i)^years.</p>
     <h3>Return achieved in the Annual review</h3>
     <p>A Modified Dietz return that uses the model's own timing, for the whole portfolio and each pot:</p>
     <div class="formula">growth  = close − open − added
@@ -328,13 +329,13 @@ checkpoints[i] = { age, corpus, invested, multiple }   <span class="cm">null cor
         <tr><td><code>compounding_calculator_active_profile_v5</code></td><td>The selected user ID.</td></tr>
         <tr><td><code>compounding_calculator_deleted_users_v1</code></td><td>Deletion markers (user ID → time), so deleted users do not come back when merging.</td></tr>
         <tr><td><code>compounding_calculator_inflation</code></td><td>The inflation rate in % (default 6).</td></tr>
-        <tr><td><code>compounding_calculator_real_view</code></td><td><code>1</code> while the Today’s ₹ view is on.</td></tr>
+        <tr><td><code>compounding_calculator_real_view</code></td><td><code>1</code> while the INF_ADJ view (today’s rupees) is on.</td></tr>
         <tr><td><code>compounding_calculator_theme</code></td><td><code>dark</code> or <code>light</code>. The manuals read it too.</td></tr>
         <tr><td>IndexedDB <code>compounding-calculator / kv / dbHandle</code></td><td>The linked database file's handle.</td></tr>
       </tbody>
     </table></div>
     <h3>Database file</h3>
-    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.13",
+    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.14",
   "savedAt": "…", "users": { … }, "deleted": { "old.user": "2026-…" } }</div>
     <ul>
       <li>Created or opened with the File System Access API (Chromium browsers: Edge, Chrome).</li>
@@ -350,7 +351,7 @@ checkpoints[i] = { age, corpus, invested, multiple }   <span class="cm">null cor
         <tr><td>Core engine and new users</td><td>₹1,00,000 lump, ₹10,000 SIP, step-up on 10% (₹1,000 in ₹ mode), last step-up year 10, SIP 10 yrs 0 months, 70/30, 15% / 25%, horizon 30, spouse off.</td></tr>
         <tr><td>Goal</td><td>₹10 Cr in 20 years, assumed return = plan's blended CAGR.</td></tr>
         <tr><td>Youngster lab</td><td>Age 20 (range 0–55), no lump sum, ₹10,000, step-up 10% (₹500 in ₹ mode), stop step-up 10, stop SIP 10 yrs 0 months, 70% / 17% / 27%, horizons 30 / 40 / 50 years, waiting steps of 3 years.</td></tr>
-        <tr><td>Inflation</td><td>6% a year; Today’s ₹ view off; goal “Target in today’s money” off.</td></tr>
+        <tr><td>Inflation</td><td>6% a year; INF_ADJ view (today’s rupees) off; goal “Target in today’s money” off.</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -526,7 +527,7 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
       <li>Wrap every storage access in try/catch; the app must work with storage blocked.</li>
       <li>Plain sentences on screen: say what happens and what to do.</li>
     </ul>
-    <footer class="manual-footer">Compounding Calculator v1.13 · 29 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
+    <footer class="manual-footer">Compounding Calculator v1.14 · 29 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
   </section>
 </article>
 </div>
