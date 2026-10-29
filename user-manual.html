@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compounding Calculator User Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="manual.css?v=1.11">
+<script src="manual.js?v=1.11"></script>
+</head>
+<body>
+<div class="manual">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">User manual</p>
+  <p class="toc-sub">Compounding Calculator v1.11</p>
+  <ol>
+    <li><a href="#about">About the calculator</a></li>
+    <li><a href="#install">Installing and opening</a></li>
+    <li><a href="#screen">Finding your way around</a></li>
+    <li><a href="#core">Core engine</a></li>
+    <li><a href="#goal">Goal &amp; schedule</a></li>
+    <li><a href="#review">Annual review</a></li>
+    <li><a href="#youngster">Youngster lab</a></li>
+    <li><a href="#users">Users and saving</a></li>
+    <li><a href="#reports">Reports and exports</a></li>
+    <li><a href="#example">Worked example</a></li>
+    <li><a href="#faq">Questions and fixes</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<article>
+  <details class="toc-mobile"><summary>Contents</summary>
+    <ol>
+      <li><a href="#about">About the calculator</a></li><li><a href="#install">Installing and opening</a></li>
+      <li><a href="#screen">Finding your way around</a></li><li><a href="#core">Core engine</a></li>
+      <li><a href="#goal">Goal &amp; schedule</a></li><li><a href="#review">Annual review</a></li>
+      <li><a href="#youngster">Youngster lab</a></li><li><a href="#users">Users and saving</a></li>
+      <li><a href="#reports">Reports and exports</a></li><li><a href="#example">Worked example</a></li>
+      <li><a href="#faq">Questions and fixes</a></li><li><a href="#glossary">Glossary</a></li>
+    </ol>
+  </details>
+
+  <header class="cover">
+    <svg class="cover-curve" viewBox="0 0 420 120" aria-hidden="true">
+      <line x1="0" y1="112" x2="420" y2="112" stroke="currentColor" stroke-opacity=".18"/>
+      <path d="M0 112 C 160 110, 250 104, 310 86 S 390 30, 420 6" fill="none" stroke="#3ED6A0" stroke-width="3"/>
+      <path d="M0 112 L 420 104" fill="none" stroke="#8193AE" stroke-width="2" stroke-dasharray="5 5"/>
+      <circle cx="420" cy="6" r="4" fill="#F2B544"/>
+    </svg>
+    <p class="cover-eyebrow">User manual</p>
+    <h1>Compounding <span>Calculator</span></h1>
+    <p class="cover-lede">How to plan a core + satellite portfolio, set a goal, record each year's results and see what starting early is worth.</p>
+    <ul class="cover-meta">
+      <li>Version <strong>1.11</strong></li>
+      <li>Released <strong>24 Oct 2026</strong></li>
+      <li>Developed by <strong>Sathiya Sekhar E</strong></li>
+    </ul>
+  </header>
+
+  <section class="print-toc" aria-hidden="true">
+    <h2>Contents</h2>
+    <ol>
+      <li><span>01</span><p>About the calculator<small>What it does and which edition you have</small></p></li>
+      <li><span>02</span><p>Installing and opening<small>Windows installer, web page, uninstalling</small></p></li>
+      <li><span>03</span><p>Finding your way around<small>Header, pages, Reset page, Help</small></p></li>
+      <li><span>04</span><p>Core engine<small>Your plan, its results and the growth chart</small></p></li>
+      <li><span>05</span><p>Goal &amp; schedule<small>Goal, CAGR comparison, doubling ladder, 60-year table</small></p></li>
+      <li><span>06</span><p>Annual review<small>Year-end records and the road back to the goal</small></p></li>
+      <li><span>07</span><p>Youngster lab<small>Wealth at 50, 60 and 70, and the cost of waiting</small></p></li>
+      <li><span>08</span><p>Users and saving<small>Users, goals, the database file, backups</small></p></li>
+      <li><span>09</span><p>Reports and exports<small>PDF report, CSV, copying tables</small></p></li>
+      <li><span>10</span><p>Worked example<small>The standard plan, step by step</small></p></li>
+      <li><span>11</span><p>Questions and fixes<small>Common questions and what to do</small></p></li>
+      <li><span>12</span><p>Glossary<small>The terms used on screen</small></p></li>
+    </ol>
+  </section>
+
+  <!-- 1 -->
+  <section class="chapter" id="about">
+    <p class="chapter-num">01</p>
+    <h2>About the calculator</h2>
+    <p class="lede">The Compounding Calculator projects how a long-term equity portfolio grows when it is split into a steady <b class="c-core">core</b> and a faster-growing <b class="c-sat">satellite</b>, and how much of the final money comes from compounding rather than from what you put in.</p>
+    <p>It answers four questions, one on each page:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Page</th><th>The question it answers</th></tr></thead>
+      <tbody>
+        <tr><td>Core engine</td><td>If I invest this lump sum and this monthly SIP, split this way, what will I have in <i>n</i> years?</td></tr>
+        <tr><td>Goal &amp; schedule</td><td>When does my plan reach my goal, what SIP or return would get there on time, and what does every year look like?</td></tr>
+        <tr><td>Annual review</td><td>I have real results for the years so far. Am I still on track, and what must change from here?</td></tr>
+        <tr><td>Youngster lab</td><td>How much is starting at 21 worth compared with starting at 24, 27 or 30?</td></tr>
+      </tbody>
+    </table></div>
+    <h3>The core + satellite idea</h3>
+    <p>Most of the money (by default 70%) goes into a <b class="c-core">core</b> of steady compounders expected to earn a moderate return (15% a year by default). The rest (30%) goes into a <b class="c-sat">satellite</b> of higher-growth ideas expected to earn more (25%). The calculator grows the two as separate pots and never rebalances them, so over long periods the satellite usually ends up as most of the wealth.</p>
+    <div class="note warn"><span class="note-label">Projections, not promises</span>
+      <p>Every result assumes the same return every year. Real markets are uneven, and a bad year early on changes the outcome. Use the Annual review page each year to replace assumptions with what actually happened.</p></div>
+    <h3>Two editions</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>Windows app</th><th>Web page</th></tr></thead>
+      <tbody>
+        <tr><td>How you open it</td><td>Start menu or desktop shortcut</td><td>A link in any browser</td></tr>
+        <tr><td>Calculations</td><td colspan="2">Identical in both</td></tr>
+        <tr><td>Users and records</td><td>This browser profile, plus an optional database file</td><td>That browser only</td></tr>
+        <tr><td>PDF report, CSV, export of users</td><td>Yes</td><td>Not available</td></tr>
+        <tr><td>Deleting with confirmation</td><td>A confirmation box</td><td>Click the same button twice within 6 seconds</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="chapter" id="install">
+    <p class="chapter-num">02</p>
+    <h2>Installing and opening</h2>
+    <h3>Windows app</h3>
+    <ol class="steps">
+      <li>Run <b>CompoundingCalculator-Setup.exe</b>. No administrator rights are needed; it installs only for your Windows user.</li>
+      <li>Click <span class="ui">Yes</span> to install (or to update an older version). Your users and records are kept during an update.</li>
+      <li>Open <b>Compounding Calculator</b> from the Start menu or the desktop. It opens in its own window using Microsoft Edge (or Chrome if Edge is missing).</li>
+    </ol>
+    <dl class="defs">
+      <dt>Program folder</dt><dd><code>%LOCALAPPDATA%\Programs\Compounding Calculator</code></dd>
+      <dt>Data folder</dt><dd><code>C:\Users\&lt;you&gt;\Compounding Calculator Data</code>, created for an optional database file (see chapter 8)</dd>
+      <dt>Uninstall</dt><dd>Windows <b>Settings → Apps → Installed apps → Compounding Calculator → Uninstall</b>, or run <code>Uninstall.exe</code> in the program folder. The data folder is left in place.</dd>
+    </dl>
+    <h3>Web page</h3>
+    <p>Open the link you were given. Nothing is installed. Whatever you save stays in that browser on that device, and nobody else can see it.</p>
+    <h3>Your first five minutes</h3>
+    <ol class="steps">
+      <li>On <span class="ui">Core engine</span>, enter your lump sum and monthly SIP, then move the <span class="ui">Core allocation</span>, <span class="ui">Core CAGR</span> and <span class="ui">Satellite CAGR</span> sliders.</li>
+      <li>Read the large figure: your corpus in the final year. Hover over the chart to see any year.</li>
+      <li>Press <span class="ui">New user</span>, enter your name, a user ID and a goal, then <span class="ui">Create user</span>.</li>
+      <li>Open <span class="ui">Goal &amp; schedule</span> to see when you reach the goal and the SIP that gets there on time.</li>
+      <li>Press <span class="ui">Save</span> whenever you want the current plan kept for this user.</li>
+    </ol>
+    <div class="note"><span class="note-label">Help is built in</span><p>Press <span class="ui">Help</span> in the header (or <kbd>F1</kbd>) on any page. This manual opens at the chapter for that page. The Design manual is one click away in the same window.</p></div>
+    <figure><img src="img/help.jpg?v=1.11" width="1800" height="1125" alt="The Help window showing the User manual at the Core engine chapter, with buttons for the Design manual, Help for this page and Open in a new window"><figcaption><b>Help window.</b> Switch manuals at the top; <span class="ui">Help for this page</span> jumps back to the current page's chapter; <span class="ui">Open in a new window</span> shows the manual on its own.</figcaption></figure>
+  </section>
+
+  <!-- 3 -->
+  <section class="chapter" id="screen">
+    <p class="chapter-num">03</p>
+    <h2>Finding your way around</h2>
+    <figure><img src="img/header.jpg?v=1.11" width="1800" height="169" alt="The header with user selector, Save, New user, Manage, storage status, CSV, PDF, Help and theme buttons, and the four page tabs"><figcaption><b>Header and page tabs.</b> The header is the same on every page.</figcaption></figure>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Control</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>Version pill (v1.11)</td><td>Shows the version, release date, developer and version history.</td></tr>
+        <tr><td>User</td><td>Switches between saved users. Each user has a plan, a goal and year-end records.</td></tr>
+        <tr><td>Save</td><td>Saves the current plan and goal to the selected user. It turns gold when there are unsaved changes.</td></tr>
+        <tr><td>New user</td><td>Creates a user with a name, user ID and goal.</td></tr>
+        <tr><td>Manage</td><td>Lists users; opens, deletes, exports and imports them; links a database file.</td></tr>
+        <tr><td>Storage pill</td><td>Says where data is saved: <i>Saved in this browser</i>, the database file name, or <i>Reconnect …</i>. Shows <i>• unsaved</i> when there are changes not yet saved.</td></tr>
+        <tr><td>CSV</td><td>Downloads the 60-year schedule as a spreadsheet file (Windows app).</td></tr>
+        <tr><td>PDF</td><td>Prints the plan as a one-page summary, or a summary with the full schedule (Windows app).</td></tr>
+        <tr><td>Help</td><td>Opens this manual at the page you are on. <kbd>F1</kbd> does the same.</td></tr>
+        <tr><td>Light / Dark</td><td>Switches the colour theme. The choice is remembered.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Pages</h3>
+    <p>The four tabs under the header are <span class="ui">Core engine</span>, <span class="ui">Goal &amp; schedule</span>, <span class="ui">Annual review</span> and <span class="ui">Youngster lab</span>. All pages work from the same plan, so a change on Core engine shows up on the other pages at once.</p>
+    <h3>Reset page</h3>
+    <p><span class="ui">Reset page</span> (right of the tabs) affects only the page you are on, and a message with <span class="ui">Undo</span> appears for a few seconds:</p>
+    <ul>
+      <li><b>Core engine</b>: back to the standard plan (₹1,00,000 lump sum, ₹10,000 SIP, 10% step-up, 70/30, 15% / 25%, 30 years, spouse off).</li>
+      <li><b>Goal &amp; schedule</b>: back to the selected user's saved goal.</li>
+      <li><b>Annual review</b>: discards entries you typed but did not save. Saved records are untouched.</li>
+      <li><b>Youngster lab</b>: back to age 21, ₹10,000 a month, 5% step-up for 10 years, SIP for 10 years, 70% / 17% / 27%.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section class="chapter" id="core">
+    <p class="chapter-num">04</p>
+    <h2>Core engine</h2>
+    <p class="lede">Set the plan on the left; the results on the right update as you type or drag.</p>
+    <figure><img src="img/core-overview.jpg?v=1.11" width="1800" height="1125" alt="Core engine page with the standard plan: inputs on the left, corpus of ₹22.91 crore at year 30, Portfolio IRR and Blended CAGR, split strip and growth chart"><figcaption><b>Core engine with the standard plan.</b> ₹1 lakh lump sum and ₹10,000 a month grow to about ₹22.91 Cr in 30 years.</figcaption></figure>
+
+    <h3>Portfolio strategy</h3>
+    <p>These settings apply to everyone's money in the plan, yours and your spouse's.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Control</th><th>Meaning</th><th class="num">Range</th><th class="num">Default</th></tr></thead>
+      <tbody>
+        <tr><td>Core allocation</td><td>Share of every rupee that goes to the core. The rest goes to the satellite. The bar under it shows the split.</td><td class="num">0–100%, steps of 5</td><td class="num">70%</td></tr>
+        <tr><td>Core CAGR</td><td>Yearly return expected from the core.</td><td class="num">8–32%</td><td class="num">15%</td></tr>
+        <tr><td>Satellite CAGR</td><td>Yearly return expected from the satellite.</td><td class="num">15–45%</td><td class="num">25%</td></tr>
+        <tr><td>Horizon</td><td>The year the headline results are measured at.</td><td class="num">1–60 yrs</td><td class="num">30 yrs</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Your money and your spouse's</h3>
+    <p>The <span class="ui">Self</span> and <span class="ui">Spouse</span> buttons switch the input panel. Each shows a chip with the monthly amount, or <i>Off</i>.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Control</th><th>Meaning</th><th class="num">Default</th></tr></thead>
+      <tbody>
+        <tr><td>Initial lump sum</td><td>Money invested at the start (year 0).</td><td class="num">₹1,00,000</td></tr>
+        <tr><td>Monthly SIP</td><td>Amount invested every month in year 1.</td><td class="num">₹10,000</td></tr>
+        <tr><td>Include monthly SIP</td><td>Switch off to see the lump sum on its own.</td><td class="num">On</td></tr>
+        <tr><td>Yearly step-up</td><td>How much the monthly SIP rises each year. Choose <span class="ui">%</span> (e.g. 10% more each year) or <span class="ui">₹</span> (e.g. ₹1,000 more each year). The line under it shows the other form, e.g. “= +₹1,000/mo in year 2 … SIP reaches ₹23,579/mo by year 10”. The switch turns step-up on or off.</td><td class="num">On, 10%</td></tr>
+        <tr><td>Last step-up in year</td><td>The SIP stops rising after this year and stays flat.</td><td class="num">10</td></tr>
+        <tr><td>SIP runs for</td><td>Years of SIP, plus 0–11 extra months. After this the money keeps compounding with no new money.</td><td class="num">10 yrs 0 months</td></tr>
+        <tr><td>Add spouse's investments</td><td>Spouse panel only. Turns the spouse's lump sum and SIP on, with their own step-up and stop settings.</td><td class="num">Off</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><span class="note-label">Two different stops</span><p><b>Last step-up in year</b> ends the yearly rise; the SIP carries on at its last amount. <b>SIP runs for</b> ends the SIP itself. With both at 10, the SIP rises for 10 years and then stops.</p></div>
+
+    <h3>Results</h3>
+    <dl class="defs">
+      <dt>Your corpus in year <i>n</i></dt><dd>Total value at the horizon, in crore and in full rupees, with how many times what you invested.</dd>
+      <dt>You put in</dt><dd>Everything invested: lump sums plus all SIPs up to the horizon.</dd>
+      <dt>Compounding added</dt><dd>Corpus minus what you put in, and its share of the corpus.</dd>
+      <dt class="c-gold">Portfolio IRR</dt><dd>The single yearly return that turns your actual cash flows (lump sum, then each year's SIPs) into the final corpus. This is the return your money really earned.</dd>
+      <dt>Blended CAGR</dt><dd>The planned average return: core share × core CAGR + satellite share × satellite CAGR. With 70/30, 15% and 25% it is 18%.</dd>
+      <dt>Money doubles every</dt><dd>Doubling time at the Portfolio IRR.</dd>
+      <dt>Next doubling horizon</dt><dd>Years after the horizon for the corpus to double once more.</dd>
+      <dt>Core and satellite corpus</dt><dd>Value of each pot at the horizon and its share of the wealth. The sentence between them compares the starting split with the ending split.</dd>
+    </dl>
+    <div class="note"><span class="note-label">Why IRR is higher than Blended CAGR</span><p>The pots are never rebalanced, so the faster satellite becomes a larger share of the money every year (30% of each rupee invested, but about 79% of the corpus by year 30). The return on the whole portfolio drifts up towards the satellite's rate. The note under the two figures states the gap in points.</p></div>
+
+    <h3>Growth path chart</h3>
+    <p>Lines show the total corpus, the core, the satellite and the money invested (dashed). <span class="ui">Linear</span> shows rupees to scale. <span class="ui">Log</span> makes each doubling the same height, which makes the early years readable.</p>
+    <p>The gold markers show when <b>25%, 50% and 75%</b> of the final corpus has been made. The line above the chart says it in words: with the standard plan, half of the year-30 corpus is made by year 26.6, so the last 3.4 years make the other half.</p>
+    <figure><img src="img/core-chart-tooltip.jpg?v=1.11" width="1271" height="318" alt="Growth chart with a tooltip showing end goal, percentage achieved by the year, core, satellite and invested amounts"><figcaption><b>Hover over the chart</b> to read any year: End goal (year <i>n</i>), % achieved by that year, Core, Satellite and Invested.</figcaption></figure>
+
+    <h3>With your spouse</h3>
+    <p>When the spouse switch is on, a strip under the chart compares <b>Self only</b> with <b>With spouse</b>: both corpora, both amounts invested, the extra wealth from the spouse's money, and how much sooner the self-only corpus is reached together. The tooltip adds a <i>Self only</i> line.</p>
+    <figure><img src="img/core-spouse.jpg?v=1.11" width="1800" height="1125" alt="Core engine with the spouse panel on and the comparison strip under the chart"><figcaption><b>Spouse on</b>: ₹50,000 lump sum and ₹5,000 a month added.</figcaption></figure>
+  </section>
+
+  <!-- 5 -->
+  <section class="chapter" id="goal">
+    <p class="chapter-num">05</p>
+    <h2>Goal &amp; schedule</h2>
+    <p class="lede">The selected user's goal, three ways to reach it, and every year of the plan.</p>
+    <figure><img src="img/plan-goal.jpg?v=1.11" width="1800" height="1125" alt="Goal and schedule page with target ₹10 crore in 20 years and three result cards"><figcaption><b>Goal of ₹10 Cr in 20 years</b> with the standard plan.</figcaption></figure>
+    <h3>Setting the goal</h3>
+    <dl class="defs">
+      <dt>Target corpus</dt><dd>The amount you want. The chips fill in ₹5, 10, 25, 50 or 100 Cr.</dd>
+      <dt>Deadline</dt><dd>Years from the start of the plan. The line below shows what the current plan has by then.</dd>
+      <dt>Blended CAGR to assume</dt><dd>The return used to work out the SIP needed (6–40%). It starts at your blended CAGR. Move it to test a more cautious or a bolder return; <span class="ui">Back to my CAGR</span> undoes it and <span class="ui">Use … in my plan</span> copies it into the Core engine, keeping your core–satellite gap.</dd>
+    </dl>
+    <p>Goal changes belong to the selected user. Press <span class="ui">Save</span> in the header to keep them.</p>
+    <h3>The three answers</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Card</th><th>What it tells you</th><th>Standard plan, ₹10 Cr in 20 yrs</th></tr></thead>
+      <tbody>
+        <tr><td>When your current plan gets there</td><td>The year the corpus first reaches the target, and how far that is from the deadline.</td><td>Year 25.9, 5.9 years late</td></tr>
+        <tr><td>Monthly SIP to hit it on time</td><td>The starting SIP, with your step-up, stop years and lump sum unchanged, that reaches the target exactly at the deadline at the assumed CAGR.</td><td>₹34,996 a month</td></tr>
+        <tr><td>CAGR needed with current SIP</td><td>The blended return that reaches the target on time with today's SIP, and the core and satellite rates that make it up.</td><td>26.8% (about 23.8% core, 33.8% satellite)</td></tr>
+      </tbody>
+    </table></div>
+    <h3>What a different CAGR does</h3>
+    <p>Each row keeps your lump sum, SIP, step-up and core–satellite gap and changes only the return (12% to 30%, plus your own). Columns: core / satellite rates, Portfolio IRR, doubling time, corpus at your horizon, the year the goal is reached and the SIP needed for the goal on time. Your row is marked <span class="ui">yours</span>. Click any row to use that CAGR in the goal above.</p>
+    <figure><img src="img/plan-lower.jpg?v=1.11" width="1800" height="1125" alt="Table comparing blended CAGRs from 12 to 30 percent, followed by the doubling ladder"><figcaption><b>CAGR comparison and doubling ladder.</b></figcaption></figure>
+    <h3>Doubling ladder</h3>
+    <p>Each rung is a multiple of your starting capital (2×, 4×, 8× …) with the amount, the year it is reached and the gap from the previous rung. Rungs within your horizon are highlighted. The note above states the IRR, the doubling time and the Rule of 72 estimate for comparison.</p>
+    <h3>Year-by-year schedule</h3>
+    <p>Click <span class="ui">Show</span> to open the full 60-year table. Your horizon row is highlighted.</p>
+    <figure><img src="img/plan-schedule.jpg?v=1.11" width="1721" height="700" alt="Year-by-year schedule table with core and satellite columns"><figcaption><b>The schedule</b>, with <span class="ui">Download CSV</span> and <span class="ui">Copy table</span>.</figcaption></figure>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Self added / Spouse added</td><td>SIP money put in that year.</td></tr>
+        <tr><td>Core open, added, growth, close</td><td>The core pot at the start of the year, money added, growth earned, and value at year end. The same four for the satellite.</td></tr>
+        <tr><td>Total corpus / Total invested</td><td>Both pots together, and everything put in so far.</td></tr>
+        <tr><td>Multiple</td><td>Corpus ÷ invested.</td></tr>
+        <tr><td>% of final corpus</td><td>How much of the horizon corpus exists by that year.</td></tr>
+        <tr><td>Yrs to next 2×</td><td>Years until the corpus doubles from that year's value.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">SIPs are treated as invested through the year, so in the year they go in they earn about half a year's return.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="chapter" id="review">
+    <p class="chapter-num">06</p>
+    <h2>Annual review</h2>
+    <p class="lede">Once a year, record what you actually invested and what the portfolio is worth. The calculator re-plans the rest of the road to the goal.</p>
+    <figure><img src="img/review.jpg?v=1.11" width="1800" height="1125" alt="Annual review page with user card, projected corpus, goal date, return needed and SIP needed, and the plan versus actual chart"><figcaption><b>Annual review</b> for an example user with two years recorded.</figcaption></figure>
+    <h3>Choose the user</h3>
+    <p>Type a name or user ID in <span class="ui">Find a user by name or user ID</span> and press <span class="ui">Open</span> (or pick from the header). The user card shows the goal, the year the plan started, how many years are recorded and when the user was last saved. <span class="ui">Edit user &amp; goal</span> changes the name, goal or start year.</p>
+    <h3>The four cards</h3>
+    <dl class="defs">
+      <dt>Projected at goal year</dt><dd>Recorded years as they actually happened, then the plan for the rest. Says how far above or short of the goal this lands.</dd>
+      <dt>Goal reached in</dt><dd>The year the revised projection reaches the goal, before or after the deadline.</dd>
+      <dt>Return needed from here on</dt><dd>The blended CAGR needed for the remaining years, compared with your planned CAGR.</dd>
+      <dt>Monthly SIP needed from year <i>n</i></dt><dd>The SIP from next year on that reaches the goal at the planned returns. If your SIP is still running, the planned SIP path (with its step-up) is scaled up or down. If it has already ended, the card shows a flat SIP restarted until the goal year. Past years are never changed.</dd>
+    </dl>
+    <h3>Recording a year</h3>
+    <ol class="steps">
+      <li>At the end of each plan year, find that year's row in <span class="ui">Year-end records</span>. The grey placeholders show the planned figures.</li>
+      <li>Enter <b>Actual invested</b> (leave blank to use the planned amount), <b>Core value</b> and <b>Satellite value</b> at year end. Both values are needed.</li>
+      <li>Press <span class="ui">Save</span> on the row (or <kbd>Enter</kbd>). The record is stored for the user straight away, and the next year's row appears.</li>
+    </ol>
+    <figure><img src="img/review-lower.jpg?v=1.11" width="1800" height="1125" alt="Year-end records table with two saved years and the next year ready to fill in"><figcaption><b>Year-end records.</b> Return achieved is worked out for you; <i>vs plan</i> shows the difference from the original plan.</figcaption></figure>
+    <p><b>Return achieved</b> is the year's growth divided by the money at work: opening value plus half of the year's investments. It is shown for the whole portfolio and for core and satellite separately. A row's <span class="ui">Delete</span> removes that year; <span class="ui">Delete all records</span> clears the user's history.</p>
+    <div class="note"><span class="note-label">Records also move the Core engine</span><p>Once a user has records, the Core engine and Goal &amp; schedule pages start from the recorded values too, so all pages tell the same story.</p></div>
+    <p>The chart compares the <b>original plan</b>, the <b>actual + revised projection</b> and the <b>goal</b> line.</p>
+  </section>
+
+  <!-- 7 -->
+  <section class="chapter" id="youngster">
+    <p class="chapter-num">07</p>
+    <h2>Youngster lab</h2>
+    <p class="lede">For a young investor: wealth at 50, 60 and 70, and what waiting three, six or nine years really costs.</p>
+    <figure><img src="img/youngster.jpg?v=1.11" width="1800" height="1125" alt="Youngster lab inputs and the age 50, 60 and 70 results"><figcaption><b>Youngster lab</b> with its starting values.</figcaption></figure>
+    <h3>Inputs</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Control</th><th>Meaning</th><th class="num">Default</th></tr></thead>
+      <tbody>
+        <tr><td>Current age</td><td>15 to 55. The years of compounding to 70 show top right.</td><td class="num">21</td></tr>
+        <tr><td>Monthly investment</td><td>Type an amount or use the chips (₹5k to ₹50k).</td><td class="num">₹10,000</td></tr>
+        <tr><td>Yearly step-up</td><td>In % or ₹, with an on/off switch, as on the Core engine.</td><td class="num">5%</td></tr>
+        <tr><td>Stop stepping up after</td><td>Use − and + for 1-year steps. After this the SIP stays flat.</td><td class="num">10 yrs</td></tr>
+        <tr><td>Stop investing after</td><td>Years plus 0–11 months. The corpus keeps compounding to 70.</td><td class="num">10 yrs</td></tr>
+        <tr><td>Core allocation</td><td>Core / satellite split, with the Core+SAT blend shown under the bar.</td><td class="num">70%</td></tr>
+        <tr><td>Core CAGR / Satellite CAGR</td><td>Expected return of each pot.</td><td class="num">17% / 27%</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Results</h3>
+    <p>Cards show wealth at <b>50</b>, <b>60</b> and <b>70</b> with the multiple of money invested, the total invested, the amount made by compounding, and the <b>cost of waiting 3 years</b>. With the defaults: ₹20.95 Cr at 50, ₹199.53 Cr at 60 and ₹2,037.97 Cr at 70 from ₹15.09 L invested.</p>
+    <figure><img src="img/youngster-lower.jpg?v=1.11" width="1800" height="1125" alt="What waiting costs cards for waiting 3, 6 and 9 years, and the How fast money doubles table"><figcaption><b>What waiting costs</b> and <b>How fast money doubles</b>.</figcaption></figure>
+    <h3>What waiting costs</h3>
+    <p>The same plan started 3, 6 or 9 years later, measured at age 70. With the defaults, waiting 3 years costs about half the final wealth (−50%), 6 years −75% and 9 years −88%.</p>
+    <h3>How fast money doubles</h3>
+    <p>A small table compares a fixed deposit (6.5%), the Nifty 50 index (13%) and your <b>Core+SAT</b> mix from the three sliders: the return, the doubling time and what ₹1 lakh becomes in 30 years. The note under it gives the mix's first doubling time and how many times a lump sum doubles before 70.</p>
+    <div class="note"><span class="note-label">Why the age-70 figure is so large</span><p>The core and the satellite grow as separate pots with no rebalancing, as in the Core engine. Over 49 years the 27% satellite grows far faster and ends up as nearly all the money, so the result is much higher than a flat 20% would give (₹491.80 Cr). Set Core allocation to 100% and Core CAGR to 20% to see the flat-rate figure.</p></div>
+    <h3>Year-by-year table</h3>
+    <p>Click <span class="ui">Show</span> to see every year from your age to 70: age, year, monthly SIP, invested and growth that year, total invested, wealth and multiple.</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="chapter" id="users">
+    <p class="chapter-num">08</p>
+    <h2>Users and saving</h2>
+    <p class="lede">Each user holds one plan, one goal and their year-end records. Users work like a small database kept on your computer.</p>
+    <h3>Creating a user</h3>
+    <div class="fig-pair">
+      <figure><img src="img/modal-new-user.jpg?v=1.11" width="1800" height="1125" alt="New user window with name, user ID, goal, start year and starting plan"><figcaption><b>New user.</b></figcaption></figure>
+      <figure><img src="img/modal-users.jpg?v=1.11" width="1800" height="1125" alt="Users and database window with the user list, database file options and export and import buttons"><figcaption><b>Users &amp; database</b> (Manage).</figcaption></figure>
+    </div>
+    <dl class="defs">
+      <dt>Name</dt><dd>Shown in the user list and on reports.</dd>
+      <dt>User ID</dt><dd>A unique short ID: 2–32 characters of lowercase letters, digits, dot, dash or underscore (e.g. <code>sekhar</code> or <code>priya.k</code>). It is suggested from the name.</dd>
+      <dt>Goal</dt><dd>Target corpus, the number of years, and the year the plan started (year 1).</dd>
+      <dt>Start the plan from</dt><dd><i>Current inputs</i> copies the Core engine as it is now; <i>Standard plan</i> uses ₹1 L + ₹10k SIP, 15% / 25%.</dd>
+    </dl>
+    <h3>Saving</h3>
+    <p>Plan and goal changes are kept for a user only when you press <span class="ui">Save</span>. Until then the button is gold and the storage pill says <i>• unsaved</i>. Year-end records are different: each row is saved when you press its own <span class="ui">Save</span>. Switching user with unsaved changes asks first.</p>
+    <h3>Where data is kept</h3>
+    <p>Users are always saved in the browser the calculator runs in. In the Windows app you can also link a <b>database file</b> (Manage → Database file), which is rewritten after every change and survives browser resets:</p>
+    <ul>
+      <li><b>On this PC only</b>: create the file in <code>Compounding Calculator Data</code> in your user folder. Nothing leaves your computer.</li>
+      <li><b>Synced</b>: create it in your OneDrive folder to use the same users on another PC. Open the same file there with <span class="ui">Open database file…</span>.</li>
+    </ul>
+    <p>When two copies differ, the more recently updated version of each user wins, and deleted users stay deleted. After restarting Windows the pill may say <i>Reconnect &lt;file&gt;</i>; click it and allow access.</p>
+    <h3>Backups</h3>
+    <p><span class="ui">Export all users (JSON)</span> saves every user to one file; <span class="ui">Import users (JSON)</span> merges a file back in using the same newer-wins rule. Export before reinstalling Windows or moving to a new PC if you do not use a database file.</p>
+  </section>
+
+  <!-- 9 -->
+  <section class="chapter" id="reports">
+    <p class="chapter-num">09</p>
+    <h2>Reports and exports</h2>
+    <h3>PDF report</h3>
+    <ol class="steps">
+      <li>Press <span class="ui">PDF</span> in the header.</li>
+      <li>Choose <b>Summary (1 page)</b>: assumptions, headline numbers, growth chart and doubling milestones; or <b>Summary + 60-year schedule</b>, which adds the full table with headers repeated on every page.</li>
+      <li>Press <span class="ui">Open print dialog</span>, choose <b>Save as PDF</b> and turn on <b>Background graphics</b> for colours.</li>
+    </ol>
+    <p>The report header shows the investor (the selected user), the date, the horizon, the version and the developer.</p>
+    <h3>CSV and copying</h3>
+    <p><span class="ui">CSV</span> in the header, or <span class="ui">Download CSV</span> in the schedule, saves the 60-year schedule for Excel. <span class="ui">Copy table</span> copies it so you can paste it into a spreadsheet or email.</p>
+    <p class="muted">The web edition cannot download files or open the print dialog, so these buttons appear only in the Windows app.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="chapter" id="example">
+    <p class="chapter-num">10</p>
+    <h2>Worked example: the standard plan</h2>
+    <p class="lede">These are the figures you see after <span class="ui">Reset page</span> on Core engine, with no year-end records.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Input</th><th class="num">Value</th></tr></thead>
+      <tbody>
+        <tr><td>Lump sum / monthly SIP</td><td class="num">₹1,00,000 / ₹10,000</td></tr>
+        <tr><td>Step-up</td><td class="num">10% a year, last in year 10</td></tr>
+        <tr><td>SIP runs for</td><td class="num">10 years</td></tr>
+        <tr><td>Split and returns</td><td class="num">70% core at 15%, 30% satellite at 25%</td></tr>
+        <tr><td>Horizon</td><td class="num">30 years</td></tr>
+      </tbody>
+    </table></div>
+    <h3>How the SIP grows</h3>
+    <p>Year 1: ₹10,000 a month (₹1,20,000 for the year). Year 2: ₹11,000. Year 3: ₹12,100. By year 10: ₹23,579 a month. From year 11 nothing new is added. Total put in: <span class="money">₹20,12,491</span>.</p>
+    <h3>What it grows to</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Year</th><th class="num">Invested so far</th><th class="num">Core</th><th class="num">Satellite</th><th class="num">Corpus</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="num">₹2.20 L</td><td class="num">₹1.71 L</td><td class="num">₹0.78 L</td><td class="num">₹2.49 L</td></tr>
+        <tr><td>10</td><td class="num">₹20.12 L</td><td class="num">₹29.05 L</td><td class="num">₹20.94 L</td><td class="num">₹49.99 L</td></tr>
+        <tr><td>20</td><td class="num">₹20.12 L</td><td class="num">₹1.18 Cr</td><td class="num">₹1.95 Cr</td><td class="num">₹3.13 Cr</td></tr>
+        <tr><td>30</td><td class="num">₹20.12 L</td><td class="num">₹4.75 Cr</td><td class="num">₹18.16 Cr</td><td class="num"><b>₹22.91 Cr</b></td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>Portfolio IRR 20.51%</b> against a <b>Blended CAGR of 18.00%</b>: the satellite grows from 30% of the money to 79% of the corpus.</li>
+      <li>Money doubles every <b>3.72 years</b>; the next doubling after year 30 takes <b>3.34 years</b>.</li>
+      <li>25% of the year-30 corpus is made by year 23.1, 50% by year 26.6 and 75% by year 28.6.</li>
+      <li>Compounding adds ₹22.71 Cr, about 99% of the corpus, on ₹20.12 L invested.</li>
+    </ul>
+    <h3>Against a goal of ₹10 Cr in 20 years</h3>
+    <p>The plan has ₹3.13 Cr at year 20 and reaches ₹10 Cr in year 25.9. To get there on time you would need either a starting SIP of <b>₹34,996</b> a month (same step-up and stop years), or a blended CAGR of <b>26.8%</b> with today's SIP.</p>
+  </section>
+
+  <!-- 11 -->
+  <section class="chapter" id="faq">
+    <p class="chapter-num">11</p>
+    <h2>Questions and fixes</h2>
+    <h4>My corpus changed after I entered a year-end record.</h4>
+    <p>That is intended. Recorded years replace the plan for that user on every page. Open a user with no records, or delete the records, to see the pure plan.</p>
+    <h4>Why is the Portfolio IRR different from the Blended CAGR?</h4>
+    <p>Because the satellite is not rebalanced back to 30%, it becomes a growing share of the portfolio. See chapter 4.</p>
+    <h4>The Goal card says “Not reachable”.</h4>
+    <p>The SIP stops before the deadline, so no starting SIP gets there in time. Increase <b>SIP runs for</b> on the Core engine, extend the deadline, or lower the target.</p>
+    <h4>The storage pill says “Reconnect …”.</h4>
+    <p>Windows needs your permission again to edit the database file. Click the pill and choose <b>Allow</b>. Until then changes are kept in the browser and written to the file once reconnected.</p>
+    <h4>My users are missing.</h4>
+    <p>Users live in the browser that saved them. If you opened the calculator in a different browser or profile, use the database file or <b>Import users (JSON)</b> from a backup.</p>
+    <h4>In the web edition, Delete does nothing.</h4>
+    <p>Pop-up confirmations are blocked there. Click the same Delete button again within 6 seconds to confirm.</p>
+    <h4>The months option is on SIP but not on step-up.</h4>
+    <p>By design: the SIP can end part-way through a year, while the step-up changes only once a year.</p>
+    <h4>Can returns be negative?</h4>
+    <p>Recorded years can show negative returns. Planned returns are always within the slider ranges.</p>
+  </section>
+
+  <!-- 12 -->
+  <section class="chapter" id="glossary">
+    <p class="chapter-num">12</p>
+    <h2>Glossary</h2>
+    <dl class="defs">
+      <dt>Lakh, crore</dt><dd>₹1 lakh (L) = ₹1,00,000. ₹1 crore (Cr) = ₹1,00,00,000 = 100 lakh. Amounts are grouped the Indian way.</dd>
+      <dt>Corpus</dt><dd>The total value of the portfolio at a point in time.</dd>
+      <dt>Lump sum</dt><dd>Money invested once, at the start.</dd>
+      <dt>SIP</dt><dd>Systematic investment plan: a fixed amount invested every month.</dd>
+      <dt>Step-up</dt><dd>The yearly increase in the monthly SIP, in % or ₹.</dd>
+      <dt>Core</dt><dd>The larger, steadier part of the portfolio.</dd>
+      <dt>Satellite</dt><dd>The smaller, higher-growth part of the portfolio.</dd>
+      <dt>CAGR</dt><dd>Compound annual growth rate: the steady yearly return assumed for a pot.</dd>
+      <dt>Blended CAGR</dt><dd>The allocation-weighted average of core and satellite CAGR.</dd>
+      <dt>IRR</dt><dd>Internal rate of return: the one yearly return that links every rupee put in, at the time it went in, to the final corpus.</dd>
+      <dt>Horizon</dt><dd>The year results are measured at.</dd>
+      <dt>Multiple</dt><dd>Corpus divided by the total amount invested.</dd>
+      <dt>Doubling time</dt><dd>Years for money to double at a given return: ln 2 ÷ ln(1 + return).</dd>
+      <dt>Rule of 72</dt><dd>A quick estimate of doubling time: 72 ÷ return in %.</dd>
+      <dt>Return achieved</dt><dd>In the Annual review: a year's growth divided by the opening value plus half the year's investments.</dd>
+    </dl>
+    <footer class="manual-footer">Compounding Calculator v1.11 · 24 Oct 2026 · Developed by Sathiya Sekhar E. Projections, not promises — returns in real markets are uneven. This manual explains the tool; it is not investment advice.</footer>
+  </section>
+</article>
+</div>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compounding Calculator Design Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="manual.css?v=1.11">
+<script src="manual.js?v=1.11"></script>
+</head>
+<body>
+<div class="manual">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">Design manual</p>
+  <p class="toc-sub">Compounding Calculator v1.11</p>
+  <ol>
+    <li><a href="#purpose">Purpose and principles</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#model">Calculation model</a></li>
+    <li><a href="#returns">Return measures</a></li>
+    <li><a href="#solvers">Solvers</a></li>
+    <li><a href="#data">Data and storage</a></li>
+    <li><a href="#visual">Visual design system</a></li>
+    <li><a href="#build">Build and release</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#limits">Limits and extending</a></li>
+  </ol>
+</nav>
+
+<article>
+  <details class="toc-mobile"><summary>Contents</summary>
+    <ol>
+      <li><a href="#purpose">Purpose and principles</a></li><li><a href="#architecture">Architecture</a></li>
+      <li><a href="#model">Calculation model</a></li><li><a href="#returns">Return measures</a></li>
+      <li><a href="#solvers">Solvers</a></li><li><a href="#data">Data and storage</a></li>
+      <li><a href="#visual">Visual design system</a></li><li><a href="#build">Build and release</a></li>
+      <li><a href="#testing">Testing</a></li><li><a href="#limits">Limits and extending</a></li>
+    </ol>
+  </details>
+
+  <header class="cover">
+    <svg class="cover-curve" viewBox="0 0 420 120" aria-hidden="true">
+      <rect x="0" y="70" width="60" height="42" rx="6" fill="#7E9CFF" fill-opacity=".85"/>
+      <rect x="70" y="52" width="60" height="60" rx="6" fill="#2BC3D8" fill-opacity=".85"/>
+      <rect x="140" y="28" width="60" height="84" rx="6" fill="#3ED6A0" fill-opacity=".85"/>
+      <rect x="210" y="6" width="60" height="106" rx="6" fill="#F2B544"/>
+      <line x1="0" y1="112" x2="420" y2="112" stroke="currentColor" stroke-opacity=".18"/>
+    </svg>
+    <p class="cover-eyebrow">Design manual</p>
+    <h1>Compounding <span>Calculator</span></h1>
+    <p class="cover-lede">How the calculator is built: the files, every formula and solver, the data model, the visual system, the Windows installer and the web edition.</p>
+    <ul class="cover-meta">
+      <li>Version <strong>1.11</strong></li>
+      <li>Released <strong>24 Oct 2026</strong></li>
+      <li>Developed by <strong>Sathiya Sekhar E</strong></li>
+    </ul>
+  </header>
+
+  <section class="print-toc" aria-hidden="true">
+    <h2>Contents</h2>
+    <ol>
+      <li><span>01</span><p>Purpose and principles<small>Scope, rules the code follows, version history</small></p></li>
+      <li><span>02</span><p>Architecture<small>Files, modules, the update cycle</small></p></li>
+      <li><span>03</span><p>Calculation model<small>The yearly schedule, step-up, SIP timing, actuals</small></p></li>
+      <li><span>04</span><p>Return measures<small>Blended CAGR, IRR, doubling, milestones, review returns</small></p></li>
+      <li><span>05</span><p>Solvers<small>Goal SIP, required return, course correction, youngster model</small></p></li>
+      <li><span>06</span><p>Data and storage<small>User record, keys, database file, merging</small></p></li>
+      <li><span>07</span><p>Visual design system<small>Colour, type, components, charts, layout, print</small></p></li>
+      <li><span>08</span><p>Build and release<small>Windows installer, web edition, version checklist</small></p></li>
+      <li><span>09</span><p>Testing<small>Test pages, browser checks, verification rules</small></p></li>
+      <li><span>10</span><p>Limits and extending<small>Model limits and how to add features</small></p></li>
+    </ol>
+  </section>
+
+  <!-- 1 -->
+  <section class="chapter" id="purpose">
+    <p class="chapter-num">01</p>
+    <h2>Purpose and principles</h2>
+    <p class="lede">A planning tool for the Technofunda core + satellite approach: two pots compounding at their own rates, a goal, yearly course correction, and a lesson in starting early.</p>
+    <h3>Rules the code follows</h3>
+    <ul>
+      <li><b>No server.</b> Plain HTML, CSS and JavaScript. It runs from local files or as a web page, offline, with no build step.</li>
+      <li><b>One engine.</b> Every number comes from <code>calculator.js</code>, which has no access to the page. The interface only reads inputs and draws results.</li>
+      <li><b>Same timing everywhere.</b> One cash-flow timing rule (chapter 3) is used for the schedule, the IRR, the goal solvers and the review.</li>
+      <li><b>Answers are checked by putting them back.</b> Every solved SIP or return is fed into the schedule again and must reproduce the target.</li>
+      <li><b>Indian conventions.</b> Lakh/crore grouping, ₹ throughout, financial years shown as 2024–25.</li>
+      <li><b>The user owns the data.</b> Data stays in the browser or in a file the user chooses.</li>
+    </ul>
+    <h3>Version history</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
+      <tbody>
+        <tr><td><b>1.11</b></td><td class="nowrap">24 Oct 2026</td><td>Help button with the User manual and Design manual inside the app (opens at the current page, <kbd>F1</kbd>); manuals as PDF; storage pill no longer clips “• unsaved”; version stamps on file addresses so browsers never mix old and new files.</td></tr>
+        <tr><td><b>1.10</b></td><td class="nowrap">21 Oct 2026</td><td>Users with IDs and goals; optional database file (local or OneDrive); annual review by user; merged Goal &amp; schedule page; spouse inside Core engine; step-up in % or ₹ with switch; SIP stop in years and months; 25/50/75% chart markers; IRR beside Blended CAGR; simplified Youngster lab with its own core/satellite sliders; Reset page with Undo; new defaults; formula fixes; new design; version control.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="chapter" id="architecture">
+    <p class="chapter-num">02</p>
+    <h2>Architecture</h2>
+    <h3>Files</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>File</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td><code>index.html</code></td><td>All markup: header, four page panels, modals, icon sprite, print-only report blocks.</td></tr>
+        <tr><td><code>styles.css</code></td><td>Design tokens (dark and light), components, responsive rules, print styles.</td></tr>
+        <tr><td><code>calculator.js</code></td><td>The engine, exported as <code>window.CompoundingEngine</code> (and as a Node module for tests). No DOM access.</td></tr>
+        <tr><td><code>app.js</code></td><td>Interface: reads inputs, calls the engine, renders cards, tables and canvas charts; users, storage, database file, modals, Help.</td></tr>
+        <tr><td><code>manual/</code></td><td>The two manuals (<code>user-manual.html</code>, <code>design-manual.html</code>), <code>manual.css</code>, <code>manual.js</code> and screenshots in <code>img/</code>.</td></tr>
+        <tr><td><code>test_runner.html</code>, <code>test_milestones.html</code></td><td>Engine test pages (chapter 9).</td></tr>
+      </tbody>
+    </table></div>
+    <h3>The update cycle</h3>
+    <div class="diagram">
+      <svg viewBox="0 0 820 250" role="img" aria-label="Inputs flow through getCurrentParams to the engine and then to the renderers; storage feeds the inputs and state">
+        <defs><marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrowhead" d="M0 0L10 5L0 10z"/></marker></defs>
+        <rect class="box" x="10" y="30" width="160" height="70" rx="10"/>
+        <text x="90" y="60" text-anchor="middle">Inputs</text><text class="t-sub" x="90" y="80" text-anchor="middle">sliders, fields, switches</text>
+        <rect class="box" x="220" y="30" width="170" height="70" rx="10"/>
+        <text x="305" y="60" text-anchor="middle">getCurrentParams()</text><text class="t-sub" x="305" y="80" text-anchor="middle">% → fractions, defaults</text>
+        <rect class="box-hi" x="440" y="30" width="170" height="70" rx="10"/>
+        <text x="525" y="60" text-anchor="middle">CompoundingEngine</text><text class="t-sub" x="525" y="80" text-anchor="middle">calculator.js</text>
+        <rect class="box" x="660" y="10" width="150" height="50" rx="10"/><text x="735" y="40" text-anchor="middle">Cards &amp; tables</text>
+        <rect class="box" x="660" y="70" width="150" height="50" rx="10"/><text x="735" y="100" text-anchor="middle">Canvas charts</text>
+        <rect class="box" x="10" y="160" width="160" height="70" rx="10"/>
+        <text x="90" y="190" text-anchor="middle">localStorage</text><text class="t-sub" x="90" y="210" text-anchor="middle">users, active user, theme</text>
+        <rect class="box" x="220" y="160" width="170" height="70" rx="10"/>
+        <text x="305" y="190" text-anchor="middle">Database file</text><text class="t-sub" x="305" y="210" text-anchor="middle">optional JSON, merged</text>
+        <rect class="box" x="440" y="160" width="170" height="70" rx="10"/>
+        <text x="525" y="190" text-anchor="middle">state</text><text class="t-sub" x="525" y="210" text-anchor="middle">actualsHistory, activeTab</text>
+        <path class="arrow" d="M170 65H216"/><path class="arrow" d="M390 65H436"/>
+        <path class="arrow" d="M610 55L656 38"/><path class="arrow" d="M610 75L656 92"/>
+        <path class="arrow" d="M90 160V104"/><path class="arrow" d="M390 195H436"/><path class="arrow" d="M170 195H216"/>
+        <path class="arrow" d="M525 160V104"/>
+      </svg>
+    </div>
+    <p>Every input fires <code>updateAll()</code>, which builds the parameter object, calls the engine with the user's <code>state.actualsHistory</code>, and redraws the Core engine, Goal &amp; schedule, Annual review and spouse comparison. The Youngster lab has its own <code>updateYoungsterLab()</code>. The goal, comparison and review solvers rerun the full schedule a few hundred times per update, which is still instant.</p>
+    <h3>Engine functions</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Function</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td><code>calculateSchedule(params, actuals)</code></td><td>60-year rows for both pots, horizon summary, IRR, doubling figures, milestones.</td></tr>
+        <tr><td><code>analyzeSpouseImpact(params)</code></td><td>Self-only vs combined corpus, extra wealth, time saved.</td></tr>
+        <tr><td><code>solveGoal(target, years, params, opts)</code></td><td>Year the goal is reached, SIP needed, CAGR needed.</td></tr>
+        <tr><td><code>reviewActualsAndCorrect(params, actuals, target)</code></td><td>Revised projection, return and SIP needed from next year, revised goal year.</td></tr>
+        <tr><td><code>calculateYoungsterWealth(options)</code></td><td>Yearly rows to age 70, values at 50/60/70, delay scenarios.</td></tr>
+        <tr><td><code>solveIRR(flows)</code></td><td>Annual IRR for cash flows at any times.</td></tr>
+        <tr><td><code>steppedMonthly(base, year, stop, mode, pct, amt)</code></td><td>Monthly SIP in a given year.</td></tr>
+        <tr><td><code>ratesForBlended(b, p)</code>, <code>weightedReturnOf(p)</code></td><td>Core/satellite rates for a blended return; the blended return of a plan.</td></tr>
+        <tr><td><code>requiredSIPAtReturn(...)</code>, <code>yearReaching(rows, target, max)</code></td><td>SIP for a goal at a given return; fractional year a target is first reached.</td></tr>
+        <tr><td><code>formatINR(v, opts)</code>, <code>formatPercent</code>, <code>formatYears</code></td><td>Display formatting (lakh/crore grouping; compact L / Cr).</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="chapter" id="model">
+    <p class="chapter-num">03</p>
+    <h2>Calculation model</h2>
+    <p class="lede">Annual steps, two pots, no rebalancing. Year 0 is the start; years 1 to 60 are computed whatever the horizon.</p>
+    <h3>Year 0</h3>
+    <div class="formula">L      = self lump + spouse lump (if spouse on)
+core₀  = L × c            <span class="cm">c = core allocation, s = 1 − c</span>
+sat₀   = L × s
+invested₀ = L</div>
+    <h3>Monthly SIP in year y</h3>
+    <div class="formula">steps = max(0, min(y, stopStepUp) − 1)
+pct mode:  M(y) = M₁ × (1 + g)^steps
+₹ mode:    M(y) = M₁ + a × steps            <span class="cm">year 1 = base SIP; last rise in year stopStepUp</span></div>
+    <h3>Months of SIP in year y</h3>
+    <div class="formula">m(y) = 12                if y ≤ N                 <span class="cm">N = SIP years</span>
+     = extra months (0–11) if y = N + 1
+     = 0                 after that
+A(y) = M(y) × m(y)                                <span class="cm">money added in year y</span></div>
+    <h3>Timing weight</h3>
+    <p>SIPs arrive through the year, so they earn only part of the year's return. A full year of monthly SIPs is treated as invested at mid-year; a part-year of <i>m</i> months starting in month 1 has its centre earlier.</p>
+    <div class="formula">w = 0.5            for a full year (m = 12)
+w = 1 − m / 24     for m months (1–11)
+<span class="cm">This matches the source spreadsheet's semi-annual rule (additions at month 6).</span></div>
+    <h3>Each pot, each year</h3>
+    <div class="formula">core_add  = A × c
+growth_c  = core_open × r_c + (A × w) × c × r_c
+core_close = core_open + core_add + growth_c
+
+sat_add   = A × s
+growth_s  = sat_open × r_s + (A × w) × s × r_s
+sat_close = sat_open + sat_add + growth_s
+
+corpus = core_close + sat_close
+invested = invested_prev + A
+multiple = corpus / invested</div>
+    <p>Self and spouse money is added together into the same two pots; each keeps its own weight <i>w</i>. Nothing moves between the pots.</p>
+    <h3>Recorded years (actuals)</h3>
+    <ul>
+      <li><b>Invested</b>: if recorded, it replaces that year's planned SIPs (split between self and spouse in the planned ratio) with <i>w</i> = 0.5.</li>
+      <li><b>Core / satellite value</b>: the recorded year-end values replace the model's closes. Growth becomes close − open − added, so the next year starts from the real values.</li>
+      <li>Only a total value: it is split in the model's core/satellite ratio for that year.</li>
+      <li>Older records with returns instead of values are still honoured (per pot or blended).</li>
+    </ul>
+    <h3>Years to next 2× and milestones</h3>
+    <p>Both use log interpolation between year-ends, which is exact for constant growth within a year:</p>
+    <div class="formula">year reaching T = (k − 1) + ln(T / V_(k−1)) / ln(V_k / V_(k−1))
+<span class="cm">k = first year with V_k ≥ T</span></div>
+    <p>Milestones are multiples (2×, 4×, … up to 131,072×) of the combined lump sum, or of year-1 additions when there is no lump sum.</p>
+    <h3>Spouse comparison</h3>
+    <p>The plan is run twice: spouse off and spouse on. The strip shows both corpora and amounts invested, the extra corpus, and the fractional year when the combined plan reaches the self-only horizon corpus (time saved = horizon − that year).</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="chapter" id="returns">
+    <p class="chapter-num">04</p>
+    <h2>Return measures</h2>
+    <h3>Blended CAGR</h3>
+    <div class="formula">blended = c × r_c + s × r_s          <span class="cm">70% × 15% + 30% × 25% = 18%</span></div>
+    <h3>Portfolio IRR</h3>
+    <p>The annual rate <i>R</i> that sets the net present value of the plan's cash flows to zero, with each contribution at its real time:</p>
+    <div class="formula">flows: −L at t = 0
+       −A_self(y)   at t = y − w_self(y)
+       −A_spouse(y) at t = y − w_spouse(y)     for y = 1 … horizon
+       +corpus      at t = horizon
+solve  Σ cf × (1 + R)^(−t) = 0             <span class="cm">Newton–Raphson from 15%; bisection fallback in (−95%, 2000%)</span></div>
+    <p>With full-year SIPs (<i>t</i> = <i>y</i> − 0.5) this equals the spreadsheet's semi-annual IRR annualised, (1 + r)² − 1. The IRR exceeds the blended CAGR because the pots are not rebalanced: the satellite's share of the money rises every year, so the portfolio's effective rate drifts towards the satellite rate.</p>
+    <h3>Doubling</h3>
+    <div class="formula">money doubles every   = ln 2 / ln(1 + IRR)
+next doubling horizon = years to next 2× measured from the horizon value
+rule of 72 (shown for comparison) = 72 / (IRR × 100)</div>
+    <h3>Share-of-corpus markers (25 / 50 / 75%)</h3>
+    <p>For <i>p</i> in {0.25, 0.5, 0.75}, the chart marks <code>yearReaching(rows, p × corpus_horizon)</code>. The headline sentence uses the 50% year and the years left after it.</p>
+    <h3>Return achieved in the Annual review</h3>
+    <p>A Modified Dietz return that uses the model's own timing, for the whole portfolio and each pot:</p>
+    <div class="formula">growth  = close − open − added
+return  = growth / (open + added × w)       <span class="cm">w = 0.5 for recorded years</span></div>
+    <h3>Youngster lab mix</h3>
+    <p>Core+SAT doubling time solves <code>c(1 + r_c)^t + s(1 + r_s)^t = 2</code> for <i>t</i> by bisection; “₹1 L in 30 yrs” is 1,00,000 × the same expression at <i>t</i> = 30. Fixed deposit (6.5%) and Nifty 50 (13%) are fixed reference rows.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="chapter" id="solvers">
+    <p class="chapter-num">05</p>
+    <h2>Solvers</h2>
+    <p class="lede">All solvers search over the full schedule with monotone bisection (50–60 halvings), so they respect step-up, stop years, months, spouse money and recorded years exactly.</p>
+    <h3>Keeping the core–satellite gap</h3>
+    <p>When a solver changes “the return”, it moves both pots together and keeps the user's spread (satellite − core):</p>
+    <div class="formula">spread = r_s − r_c
+r_c' = b − s × spread
+r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exactly</span></div>
+    <h3>Goal: SIP needed on time</h3>
+    <ol>
+      <li>Set the horizon to the goal deadline and the rates to the assumed blended CAGR (default: the plan's).</li>
+      <li>If the plan with no SIP already reaches the target, the answer is ₹0.</li>
+      <li>Start the upper bound at max(₹10,000, target ÷ (years × 12)) and double it until it reaches the target (cap ₹10¹⁰). If it never does, report “not reachable” (the SIP stops too early).</li>
+      <li>Bisect the starting monthly SIP between 0 and the bound.</li>
+    </ol>
+    <h3>Goal: CAGR needed with current SIP</h3>
+    <p>Bisect the blended return between −50% and 150%; outside that range report “over 150%” or “below −50%”.</p>
+    <h3>Goal: year reached</h3>
+    <p><code>yearReaching</code> on the current plan's 60-year rows; null means not within 60 years.</p>
+    <h3>CAGR comparison table</h3>
+    <p>Blended rates 12, 15, 18, 20, 22, 25, 28 and 30%, plus the plan's and the assumed rate. For each: rates by the gap rule, the full schedule (with actuals), IRR, doubling time, corpus at the horizon, goal year and the SIP needed on time.</p>
+    <h3>Annual review: course correction</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Output</th><th>Method</th></tr></thead>
+      <tbody>
+        <tr><td>Revised projection</td><td>Schedule with all recorded years, plan after the latest one.</td></tr>
+        <tr><td>Return needed from here</td><td>Bisect the blended return for the remaining years (recorded years fixed), −50% to 150%.</td></tr>
+        <tr><td>SIP needed, <b>scale</b> mode</td><td>Used while planned SIP remains. Multiply every future planned SIP by a factor <i>k</i> (keeping step-up and stop year) and bisect <i>k</i>. Shown as <i>k</i> × next year's planned SIP.</td></tr>
+        <tr><td>SIP needed, <b>restart</b> mode</td><td>Used when the planned SIP has ended. A flat monthly SIP from next year to the goal year, bisected.</td></tr>
+        <tr><td>Revised goal year</td><td><code>yearReaching</code> on the revised rows.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Past years are never changed by a correction. The goal horizon (not the Core engine horizon) is used throughout this page.</p>
+    <h3>Youngster lab</h3>
+    <p>Same yearly rule as the Core engine with no lump sum, ages from current age to 70, and the tab's own three sliders: core allocation, core CAGR and satellite CAGR, as two pots without rebalancing. Delay scenarios rerun the model from age + 3, + 6 and + 9 with identical SIP settings (one level only), and report the loss at 70 in rupees and %.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="chapter" id="data">
+    <p class="chapter-num">06</p>
+    <h2>Data and storage</h2>
+    <h3>User record</h3>
+    <div class="formula">{
+  "userId": "sekhar",  "name": "Sekhar",
+  "createdAt": "2024-04-01T05:00:00Z",  "updatedAt": "2026-04-05T05:00:00Z",
+  "startYear": 2024,
+  "params": { "selfLump": 100000, "selfMonthly": 10000, "selfStepUpOn": true,
+              "selfStepUp": 10, "selfStepUpMode": "pct", "selfStepUpAmt": 1000,
+              "selfStepUpStop": 10, "selfAddStop": 10, "selfAddStopMonths": 0,
+              "coreAlloc": 70, "coreRet": 15, "satRet": 25, "horizon": 30,
+              "spouseInclude": false, … },
+  "goal": { "target": 100000000, "years": 20, "assumedReturn": null },
+  "actualsHistory": {
+    "1": { "invested": 120000, "coreValue": 168000, "satValue": 84000,
+           "recordedAt": "2025-04-03T05:00:00Z" }
+  }
+}</div>
+    <p>Stored params use percentages as shown on screen; <code>getCurrentParams()</code> converts them to fractions for the engine. User IDs match <code>^[a-z0-9][a-z0-9._-]{1,31}$</code>. Older profile shapes are upgraded by <code>normaliseUsers()</code> on load.</p>
+    <h3>Browser storage keys</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Key</th><th>Holds</th></tr></thead>
+      <tbody>
+        <tr><td><code>compounding_calculator_user_profiles_v6</code></td><td>All users, keyed by user ID.</td></tr>
+        <tr><td><code>compounding_calculator_active_profile_v5</code></td><td>The selected user ID.</td></tr>
+        <tr><td><code>compounding_calculator_deleted_users_v1</code></td><td>Deletion markers (user ID → time), so deleted users do not come back when merging.</td></tr>
+        <tr><td><code>compounding_calculator_theme</code></td><td><code>dark</code> or <code>light</code>. The manuals read it too.</td></tr>
+        <tr><td>IndexedDB <code>compounding-calculator / kv / dbHandle</code></td><td>The linked database file's handle.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Database file</h3>
+    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.11",
+  "savedAt": "…", "users": { … }, "deleted": { "old.user": "2026-…" } }</div>
+    <ul>
+      <li>Created or opened with the File System Access API (Chromium browsers: Edge, Chrome).</li>
+      <li>Every save rewrites the whole file 300 ms after the last change.</li>
+      <li>On opening, the file and the browser copy are merged: the newer <code>updatedAt</code> wins per user; a deletion marker newer than a record removes it.</li>
+      <li>After a browser restart the permission must be granted again; the storage pill becomes <i>Reconnect &lt;file&gt;</i>.</li>
+      <li>Export and import use the same format and the same merge.</li>
+    </ul>
+    <h3>Defaults</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Where</th><th>Values</th></tr></thead>
+      <tbody>
+        <tr><td>Core engine and new users</td><td>₹1,00,000 lump, ₹10,000 SIP, step-up on 10% (₹1,000 in ₹ mode), last step-up year 10, SIP 10 yrs 0 months, 70/30, 15% / 25%, horizon 30, spouse off.</td></tr>
+        <tr><td>Goal</td><td>₹10 Cr in 20 years, assumed return = plan's blended CAGR.</td></tr>
+        <tr><td>Youngster lab</td><td>Age 21, ₹10,000, step-up 5% (₹500 in ₹ mode), stop step-up 10, stop SIP 10 yrs 0 months, 70% / 17% / 27%.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="chapter" id="visual">
+    <p class="chapter-num">07</p>
+    <h2>Visual design system</h2>
+    <p class="lede">A ledger at night: deep navy paper, saffron gold for money and the horizon, and one colour per kind of money so a figure's colour says what it is before you read it.</p>
+    <h3>Colour roles</h3>
+    <p>Colours are tokens in <code>styles.css</code> on <code>:root</code> (dark, the default) and <code>:root[data-theme="light"]</code>. Components only use tokens.</p>
+    <div class="swatches">
+      <div class="swatch"><i style="background:#F2B544"></i><div><b>--gold</b>#F2B544 · light #A56A12<br><span>Money, horizon, primary action</span></div></div>
+      <div class="swatch"><i style="background:#3ED6A0"></i><div><b>--growth</b>#3ED6A0 · light #0C7F5B<br><span>Corpus, gains, on track</span></div></div>
+      <div class="swatch"><i style="background:#7E9CFF"></i><div><b>--core</b>#7E9CFF · light #3A55C4<br><span>Core pot</span></div></div>
+      <div class="swatch"><i style="background:#2BC3D8"></i><div><b>--sat</b>#2BC3D8 · light #0A7D8F<br><span>Satellite pot</span></div></div>
+      <div class="swatch"><i style="background:#FF7A8A"></i><div><b>--rose</b>#FF7A8A · light #BF3A4E<br><span>Loss, late, short</span></div></div>
+      <div class="swatch"><i style="background:#8193AE"></i><div><b>--invested</b>#8193AE · light #8592A6<br><span>Money put in</span></div></div>
+      <div class="swatch"><i style="background:#0D1626"></i><div><b>--bg</b>#0D1626 · light #D5DCE5<br><span>Page</span></div></div>
+      <div class="swatch"><i style="background:#142035"></i><div><b>--panel</b>#142035 · light #E7ECF2<br><span>Cards</span></div></div>
+      <div class="swatch"><i style="background:#EAF0F8"></i><div><b>--text-main</b>#EAF0F8 · light #18283D<br><span>Text (secondary #AAB8CD, muted #7A8BA4)</span></div></div>
+    </div>
+    <p>The light theme is a soft paper grey with no pure white, to reduce glare; every accent is darkened to keep contrast on it.</p>
+    <h3>Type</h3>
+    <div class="type-sample"><div class="big">₹22.91 Cr</div><div class="ui-text muted">Bricolage Grotesque, 800 — headline figures, page and card titles</div></div>
+    <div class="type-sample"><div class="ui-text">Monthly SIP · Last step-up in year · Portfolio IRR 20.51%</div><div class="ui-text muted">IBM Plex Sans 400–700 — interface text, labels, tables</div></div>
+    <ul>
+      <li><code>--font-display</code>: Bricolage Grotesque → Segoe UI Variable Display → Segoe UI → system.</li>
+      <li><code>--font-ui</code>: IBM Plex Sans → Segoe UI → system. Body 15px.</li>
+      <li>All numbers use tabular figures so columns line up.</li>
+      <li>The Einstein line in the header is gold, on one line, with “— Albert Einstein”.</li>
+    </ul>
+    <h3>Shape and spacing</h3>
+    <p>Radii: 20px (modals, hero), 14px (cards), 10px (inputs, tiles), 7px (chips). Hairlines are translucent blue-grey (<code>--line</code>, <code>--line-strong</code>). Focus is a 3px gold ring.</p>
+    <h3>Components</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Component</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>Hero band</td><td>Corpus in display type, full rupees, multiple chip, invested vs compounding bar; IRR and Blended CAGR side by side on the right.</td></tr>
+        <tr><td>Split strip</td><td>Core and satellite corpus at either end, proportional bar between.</td></tr>
+        <tr><td>KPI cards</td><td>Label, value, one-line explanation. Value colour follows the money role.</td></tr>
+        <tr><td>Switch, % / ₹ toggle, stepper</td><td>On/off for step-up and spouse; mode toggle; − / + for 1-year steps.</td></tr>
+        <tr><td>Chips</td><td>Quick values (₹5 Cr … ₹100 Cr; ₹5k … ₹50k).</td></tr>
+        <tr><td>Ladder rungs</td><td>Doubling milestones; inside the horizon highlighted, beyond it dimmed.</td></tr>
+        <tr><td>Tables</td><td>Horizon row highlighted, right-aligned tabular numbers, sideways scroll inside the card on narrow screens.</td></tr>
+        <tr><td>Pills</td><td>Version (gold outline) and storage status (dot: grey browser, green file, gold warning).</td></tr>
+        <tr><td>Modals and toasts</td><td>Users, database, About, Print, Help. Toasts confirm actions and can carry <i>Undo</i>.</td></tr>
+        <tr><td>Help viewer</td><td>Large modal with a User / Design switch and the manual in a frame, opened at the current page's chapter.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Charts</h3>
+    <ul>
+      <li>Drawn on <code>&lt;canvas&gt;</code>, sized for the device pixel ratio (<code>prepCanvas</code>), colours read from the CSS tokens (<code>palette()</code>) so both themes match.</li>
+      <li>Growth chart: total (growth, filled), core, satellite, invested (dashed); linear or log scale; gold 25/50/75% markers; tooltip lines End goal, % achieved by year, Core, Satellite, Invested, plus Self only with a spouse.</li>
+      <li>Review chart: original plan, actual + revised, dashed goal line with its label.</li>
+      <li>Redrawn on resize and theme change.</li>
+    </ul>
+    <h3>Layout and screens</h3>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Width</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td>≥ 1200 × 860</td><td>One-screen layout: the Core engine fits the window (sidebar scrolls on its own); other pages scroll inside their panel.</td></tr>
+        <tr><td>≤ 1500</td><td>Header quote hidden; storage pill narrower; Youngster grids drop to 2–3 columns.</td></tr>
+        <tr><td>≤ 1280</td><td>Hero stacks; IRR/CAGR move under the corpus.</td></tr>
+        <tr><td>≤ 1080</td><td>Inputs move above the results (in two columns); review and Youngster lower sections stack.</td></tr>
+        <tr><td>≤ 760</td><td>Header stacks; everything in one column; 14px text.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Print</h3>
+    <p>Print styles switch to light colours, hide controls, and show a report header (investor, date, horizon, version, “Developed by Sathiya Sekhar E”), the chart and a milestones table; the full report adds the 60-year schedule with repeated headers.</p>
+    <h3>Accessibility</h3>
+    <p>Labels on every field, aria-labels on sliders and icon buttons, visible focus, <code>prefers-reduced-motion</code> respected, colour backed by words and signs (“short of the goal”, +/−) for the key states.</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="chapter" id="build">
+    <p class="chapter-num">08</p>
+    <h2>Build and release</h2>
+    <h3>Windows installer</h3>
+    <p>Two small Go programs, cross-compiled for 64-bit Windows:</p>
+    <ul>
+      <li><b>Compounding Calculator.exe</b> (launcher): opens <code>app\index.html</code> in Edge (<code>--app=file:///…</code>), else Chrome, else the default browser.</li>
+      <li><b>CompoundingCalculator-Setup.exe</b>: embeds the launcher, icon and the whole <code>app\</code> folder (including <code>manual\</code>) with <code>embed.FS</code>. Per-user install, no admin.</li>
+    </ul>
+    <div class="formula"><span class="cm"># icon and manifest resource (version in manifest.xml)</span>
+rsrc -manifest ../manifest.xml -ico ../app_icon.ico -arch amd64 -o rsrc_windows_amd64.syso
+<span class="cm"># build</span>
+GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H windowsgui"</div>
+    <dl class="defs">
+      <dt>Install folder</dt><dd><code>%LOCALAPPDATA%\Programs\Compounding Calculator</code></dd>
+      <dt>Shortcuts</dt><dd>Start menu and desktop, created by PowerShell.</dd>
+      <dt>Uninstall entry</dt><dd><code>HKCU\…\Uninstall\CompoundingCalculator</code>, publisher Sathiya Sekhar E, with <code>Uninstall.exe /uninstall</code> (and <code>/quiet</code>).</dd>
+      <dt>Data folder</dt><dd><code>%USERPROFILE%\Compounding Calculator Data</code> with a README, for a local database file. Not removed on uninstall.</dd>
+    </dl>
+    <h3>Web edition</h3>
+    <p>The same four files plus <code>manual/</code>, published as a web page. The page adds a small adaptation layer before <code>calculator.js</code>:</p>
+    <ul>
+      <li>Hides CSV, PDF, schedule CSV and Export users (downloads and printing are blocked there).</li>
+      <li>Turns off the database file (no file pickers).</li>
+      <li>Replaces <code>confirm()</code> with “click again within 6 seconds”, and <code>alert()</code> with a message bar.</li>
+      <li>Defaults to the dark theme.</li>
+    </ul>
+    <h3>Release checklist</h3>
+    <ol>
+      <li><code>APP_INFO</code> in <code>app.js</code>: version, date, history entry.</li>
+      <li>Static fallbacks in <code>index.html</code> (<code>data-app="version"</code> and <code>data-app="date"</code>).</li>
+      <li>The version stamp on every file address: <code>?v=</code> on <code>styles.css</code>, <code>calculator.js</code> and <code>app.js</code> in <code>index.html</code>, the <code>app-version</code> meta tag, and <code>manual.css</code>, <code>manual.js</code> and images in both manuals. Browsers keep files they have seen before; a new stamp makes them fetch the new version instead of mixing old and new.</li>
+      <li><code>appVersion</code> in the setup program and <code>assemblyIdentity version</code> in <code>manifest.xml</code>.</li>
+      <li>Version and date on both manuals; rebuild the PDFs.</li>
+      <li>Run the tests (chapter 9), rebuild the installer, republish the web edition.</li>
+    </ol>
+  </section>
+
+  <!-- 9 -->
+  <section class="chapter" id="testing">
+    <p class="chapter-num">09</p>
+    <h2>Testing</h2>
+    <h3>Test pages</h3>
+    <p><code>test_runner.html</code> runs eight engine suites and must end with “ALL 8 TEST SUITES PASSED”:</p>
+    <div class="table-wrap"><table class="plain">
+      <thead><tr><th>Suite</th><th>Checks</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>Full plan: invested and corpus in range, milestones present.</td></tr>
+        <tr><td>B</td><td>Monthly SIP off.</td></tr>
+        <tr><td>C</td><td>Pure SIP, lump sum 0.</td></tr>
+        <tr><td>D</td><td>Everything zero.</td></tr>
+        <tr><td>E</td><td>Goal planner with SIP off.</td></tr>
+        <tr><td>F</td><td>Spouse impact with SIP off.</td></tr>
+        <tr><td>G</td><td>Review with SIP off.</td></tr>
+        <tr><td>H</td><td>Youngster with zero monthly.</td></tr>
+      </tbody>
+    </table></div>
+    <p><code>test_milestones.html</code> prints Youngster checkpoints at 50, 60 and 70.</p>
+    <h3>Verification rules</h3>
+    <ul>
+      <li><b>Put the answer back</b>: a solved SIP or return is run through the schedule and must reproduce the target (agreement about 0.001%).</li>
+      <li><b>Spreadsheet parity</b>: <code>solveIRR</code> with mid-year flows equals the semi-annual IRR (<code>solveSemiAnnualIRR</code>) annualised.</li>
+      <li><b>Limits</b>: 100% core at 20% in the Youngster lab equals the single-rate model (₹491.80 Cr at 70 for the defaults).</li>
+      <li><b>Browser check</b>: open every page in Chromium at desktop and phone widths, both themes; no console errors; no sideways scrolling; Reset page and Undo on every page; database file round trip; print preview.</li>
+    </ul>
+  </section>
+
+  <!-- 10 -->
+  <section class="chapter" id="limits">
+    <p class="chapter-num">10</p>
+    <h2>Limits and extending</h2>
+    <h3>Model limits</h3>
+    <ul>
+      <li>Constant returns every year; no volatility or sequence risk except through recorded years.</li>
+      <li>No rebalancing between core and satellite (by design, matching the method).</li>
+      <li>No inflation, tax, costs or withdrawals.</li>
+      <li>Annual steps with a mid-year rule for SIPs, not monthly compounding.</li>
+      <li>Data lives per browser unless a database file is used; the database file needs a Chromium browser.</li>
+    </ul>
+    <h3>Adding an input to the plan</h3>
+    <ol>
+      <li>Add the control to <code>index.html</code> with a stable <code>id</code> and a label.</li>
+      <li>Cache it in <code>els</code>, read it in <code>getCurrentParams()</code> and listen for <code>input</code> → <code>updateAll()</code>.</li>
+      <li>Use it in <code>calculateSchedule()</code> and add a default there.</li>
+      <li>Add it to <code>defaultPlanParams()</code>, <code>readInputsForProfile()</code> and <code>applyParamsToInputs()</code> so it saves, loads and resets.</li>
+      <li>Add a test case and update both manuals.</li>
+    </ol>
+    <h3>Adding a page</h3>
+    <p>Add a <code>tab-btn</code> with <code>data-tab</code> and a matching <code>tab-panel</code>; give it an update function called from <code>updateAll()</code>; add its case to <code>resetPage()</code>; add an entry to <code>HELP_SECTION</code> and a chapter with that id in the User manual.</p>
+    <h3>Conventions</h3>
+    <ul>
+      <li>Engine values are fractions (0.15); the interface shows percentages.</li>
+      <li>Format money only with <code>formatINR</code>.</li>
+      <li>Colours only from tokens; new colours get dark and light values.</li>
+      <li>Wrap every storage access in try/catch; the app must work with storage blocked.</li>
+      <li>Plain sentences on screen: say what happens and what to do.</li>
+    </ul>
+    <footer class="manual-footer">Compounding Calculator v1.11 · 24 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
+  </section>
+</article>
+</div>
+</body>
+</html>
