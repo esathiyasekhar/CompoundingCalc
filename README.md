@@ -1,6 +1,6 @@
 # Compounding Calculator
 
-**Core + Satellite wealth engine · v1.12 · Developed by Sathiya Sekhar E**
+**Core + Satellite wealth engine · v1.13 · Developed by Sathiya Sekhar E**
 
 A planning tool for long-term equity investors. It shows how a portfolio split into a steady **core** and a faster-growing **satellite** compounds over time, how much of the final money comes from compounding rather than from what you put in, and what it takes to reach a goal.
 
@@ -31,8 +31,9 @@ No sign-in, no install, no server. Everything runs in your browser.
 - **Goal solver.** The year the goal is reached, the SIP needed on time, and the CAGR needed with today's SIP, plus a table of what different CAGRs do.
 - **Doubling ladder and schedule.** A doubling ladder and a 60-year year-by-year schedule, with CSV download and copy.
 - **Users with IDs and goals.** Each user's year-end records feed a revised projection and a course correction.
-- **Youngster lab.** Wealth at any three ages (up to 100) from a lump sum, a monthly SIP or both, and the cost of waiting 3, 5 or 10 years at a time.
-- **Presets for talks.** 19 ready-made demonstrations in four groups (10× in 10 years, Youngster lab, the family math, more from the slides). One click sets the inputs and opens the page, with a presenter note and Previous / Next.
+- **Youngster lab.** From age 0: wealth after three horizons you set on the cards (or move all three at once), from a lump sum, a monthly SIP or both, and the cost of waiting 3, 5 or 10 years at a time.
+- **Presets for talks.** 22 ready-made demonstrations in four groups (Core engine, Youngster lab, the family math, more presets). One click sets the inputs and opens the page, with a presenter note and Previous / Next.
+- **Inflation.** Set a rate (default 6%), press **Today’s ₹** to see every page in today’s rupees with real returns, and make the goal an inflation-adjusted freedom number.
 - **Built-in Help.** Press **Help** or **F1** to open the user manual at the page you are on. The design manual is also included.
 - **Look and Reset.** Dark and light themes, a one-page or full PDF report, and **Reset page** with Undo on every page.
 
@@ -129,4 +130,4 @@ Projections, not promises. Every result assumes the same return every year, and 
 
 ---
 
-Compounding Calculator v1.12 · 29 Oct 2026 · Developed by **Sathiya Sekhar E**
+Compounding Calculator v1.13 · 29 Oct 2026 · Developed by **Sathiya Sekhar E**

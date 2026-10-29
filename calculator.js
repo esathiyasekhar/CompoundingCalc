@@ -383,6 +383,30 @@
       annualReturnsEarned[yr] = coreRet[yr] + satRet[yr];
     }
 
+    // Today's rupees: divide every value by (1 + inflation)^t at the time it occurs.
+    // Opening values use the previous year-end, additions their mid-year timing, closes the year-end.
+    // Growth is then the residual (close − open − added), so each row still adds up.
+    const realInflation = Math.max(0, Number(p.realInflation) || 0);
+    if (realInflation > 0) {
+      const D = (t) => Math.pow(1 + realInflation, t);
+      let invR = totalInvested[0];
+      for (let yr = 1; yr <= maxYears; yr++) {
+        const dOpen = D(yr - 1), dMid = D(yr - 0.5), dEnd = D(yr);
+        coreOpen[yr] /= dOpen; satOpen[yr] /= dOpen;
+        coreAdd[yr] /= dMid; satAdd[yr] /= dMid;
+        selfContrib[yr] /= dMid; spouseContrib[yr] /= dMid;
+        coreClose[yr] /= dEnd; satClose[yr] /= dEnd;
+        coreRet[yr] = coreClose[yr] - coreOpen[yr] - coreAdd[yr];
+        satRet[yr] = satClose[yr] - satOpen[yr] - satAdd[yr];
+        totalCorpus[yr] = coreClose[yr] + satClose[yr];
+        invR += coreAdd[yr] + satAdd[yr];
+        totalInvested[yr] = invR;
+        multipleInvested[yr] = invR > 0 ? totalCorpus[yr] / invR : 0.0;
+        annualReturnsEarned[yr] = coreRet[yr] + satRet[yr];
+      }
+      contribFlows.forEach(f => { f.cf = f.cf / D(f.t); });
+    }
+
     // Years to next 2x (Logarithmic interpolation)
     const yrsToNext2x = new Array(maxYears + 1);
     for (let yr = 0; yr <= maxYears; yr++) {
@@ -485,7 +509,9 @@
     irrFlows.push({ t: h, cf: totalCorpus[h] });
     const portfolioIRR = (totalInvested[h] > 0 && totalCorpus[h] > 0) ? solveIRR(irrFlows) : 0;
     const doublingTimeAtIRR = (portfolioIRR > 0 && totalCorpus[h] > 0) ? Math.log(2) / Math.log(1 + portfolioIRR) : 0;
-    const weightedStartingReturn = (coreAlloc * Number(p.coreReturn)) + (satAlloc * Number(p.satReturn));
+    const nominalWeighted = (coreAlloc * Number(p.coreReturn)) + (satAlloc * Number(p.satReturn));
+    // In today's rupees the blended CAGR is the real rate (1 + r) / (1 + inflation) − 1
+    const weightedStartingReturn = realInflation > 0 ? (1 + nominalWeighted) / (1 + realInflation) - 1 : nominalWeighted;
 
     // Construct yearly array
     const yearlyRows = [];
@@ -518,6 +544,7 @@
 
     return {
       params: p,
+      realInflation: realInflation,
       horizon: h,
       coreCorpus: coreClose[h],
       satCorpus: satClose[h],
@@ -885,7 +912,7 @@
    * additions stop years, and projects wealth to age 70 with cost-of-delay analytics.
    */
   function calculateYoungsterWealth(options = {}) {
-    const currentAge = Math.max(10, Math.min(99, parseInt(options.currentAge, 10) || 21));
+    const currentAge = Math.max(0, Math.min(99, isNaN(parseInt(options.currentAge, 10)) ? 21 : parseInt(options.currentAge, 10)));
     // Checkpoint ages (e.g. 50, 60, 70): the projection runs to the last one unless targetAge is given
     const checkpointAges = (Array.isArray(options.checkpointAges) && options.checkpointAges.length
       ? options.checkpointAges : [50, 60, 70]).map(a => parseInt(a, 10)).filter(a => !isNaN(a));
@@ -954,6 +981,29 @@
       });
     }
 
+    // Today's rupees: deflate each row by (1 + inflation)^t, t counted from today (yearOffset for a delayed start)
+    const realInflation = Math.max(0, Number(options.realInflation) || 0);
+    const yearOffset = Math.max(0, Number(options.yearOffset) || 0);
+    if (realInflation > 0) {
+      const D = (t) => Math.pow(1 + realInflation, t);
+      let prev = lump / D(yearOffset);
+      let inv = prev;
+      yearlyRows.forEach(r => {
+        const t = r.year + yearOffset;
+        const dEnd = D(t), dMid = D(t - 0.5);
+        r.corpus /= dEnd; r.coreCorpus /= dEnd; r.satCorpus /= dEnd;
+        r.annualAdd /= dMid; r.monthly /= dMid;
+        inv += r.annualAdd;
+        r.totalInvested = inv;
+        r.annualInterest = r.corpus - prev - r.annualAdd;
+        prev = r.corpus;
+      });
+      if (yearlyRows.length) {
+        corpus = yearlyRows[yearlyRows.length - 1].corpus;
+        totalInvested = yearlyRows[yearlyRows.length - 1].totalInvested;
+      }
+    }
+
     // Extract key milestone checkpoints at ages 50, 60, and 70
     const row50 = yearlyRows.find(r => r.age === 50);
     const row60 = yearlyRows.find(r => r.age === 60);
@@ -999,6 +1049,8 @@
             delayYearsList: delayYearsList,
             lump: lump,
             checkpointAges: checkpointAges,
+            realInflation: realInflation,
+            yearOffset: yearOffset + d,
             rate: rate * 100,
             coreRate: hasSplit ? coreRate * 100 : undefined,
             satRate: hasSplit ? satRate * 100 : undefined,

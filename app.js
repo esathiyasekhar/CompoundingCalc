@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
     activeTab: 'tab-core',
     doublingTabDirty: false,
     goalReturnTouched: false,
+    inflation: (() => { try { const v = parseFloat(localStorage.getItem('compounding_calculator_inflation')); return isNaN(v) ? 6 : v; } catch (e) { return 6; } })(),
+    realView: (() => { try { return localStorage.getItem('compounding_calculator_real_view') === '1'; } catch (e) { return false; } })(),
     reviewPending: {},
     soloRows: null,
     isDirty: false,
@@ -126,9 +128,9 @@ document.addEventListener('DOMContentLoaded', function () {
     dispYoungsterHorizon: document.getElementById('disp-youngster-horizon'),
     inpYoungsterMonthly: document.getElementById('inp-youngster-monthly'),
     inpYoungsterLump: document.getElementById('inp-youngster-lump'),
-    inpYoungsterAge1: document.getElementById('inp-youngster-age-1'),
-    inpYoungsterAge2: document.getElementById('inp-youngster-age-2'),
-    inpYoungsterAge3: document.getElementById('inp-youngster-age-3'),
+    goalInflation: document.getElementById('inp-goal-inflation'),
+    inpInflation: document.getElementById('inp-inflation'),
+    inpYoungsterHz: document.getElementById('inp-youngster-hz'),
     inpYoungsterStepUpEnable: document.getElementById('inp-youngster-stepup-enable'),
     inpYoungsterStepUpPct: document.getElementById('inp-youngster-stepup-pct'),
     dispYoungsterStepUp: document.getElementById('disp-youngster-stepup'),
@@ -285,11 +287,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.12',
+    version: '1.13',
     date: '2026-10-29',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.13', date: '2026-10-29', notes: [
+        'Inflation rate in the tab bar (default 6%) and a Today’s ₹ button that shows every page in today’s rupees, with real returns',
+        'Goal: “Target in today’s money” switch for an inflation-adjusted freedom number (saved with the user)',
+        'Youngster lab: horizons set on the cards (−/+ on each) and one control that moves all three; age from 0, starting at 20',
+        'Defaults: step-up 10% and SIP for 10 years everywhere',
+        'Presets renamed; 22 presets, including two inflation demonstrations'
+      ] },
       { version: '1.12', date: '2026-10-29', notes: [
         'Presets menu: 19 ready-made demonstrations in four groups (10× in 10 years, Youngster lab, the family math, more from the slides), with a presenter note and Previous / Next',
         'While a preset is shown, the plan pages leave the user’s year-end records out',
@@ -322,6 +331,11 @@ document.addEventListener('DOMContentLoaded', function () {
       `<li><span class="ver">v${h.version}</span><strong>${fmtAppDate(h.date)}</strong><ul style="margin:6px 0 0 18px">${h.notes.map(n => `<li style="background:none;border:0;padding:1px 0">${escapeHtml(n)}</li>`).join('')}</ul></li>`).join('');
     document.title = `Compounding Calculator v${APP_INFO.version}`;
   }
+
+  /** Inflation as a fraction (from the tab-bar control). */
+  function inflRate() { return Math.max(0, Math.min(15, Number(state.inflation) || 0)) / 100; }
+  /** Today's-rupee view: the inflation used to deflate displayed values (0 = actual rupees). */
+  function viewInflation() { return state.realView ? inflRate() : 0; }
 
   /** Year-end records used by the plan pages; left out while a preset is shown. */
   function planActuals() { return state.presetId ? {} : (state.actualsHistory || {}); }
@@ -419,6 +433,7 @@ document.addEventListener('DOMContentLoaded', function () {
       spouseAddStop: Math.max(0, intOr(els.spouseAddStop, 30)),
       spouseAddStopMonths: Math.max(0, Math.min(11, intOr(els.spouseAddStopMonths, 0))),
 
+      realInflation: viewInflation(),
       maxYears: 60
     };
   }
@@ -428,6 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
    */
   function updateAll() {
     const params = getCurrentParams();
+    renderInflationState();
 
     // 1. Input label displays
     els.dispCoreAlloc.textContent = `${Math.round(params.coreAlloc * 100)}%`;
@@ -550,7 +566,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <div>Self lump sum: <strong>${inr(params.selfLump)}</strong></div>
         <div>Actual years logged: <strong>${logged || 'none'}</strong></div>
         <div style="grid-column: span 2">Self SIP: <strong>${selfSip}</strong></div>
-        <div style="grid-column: span 2">Spouse: <strong>${spouseSip}</strong></div>`;
+        <div style="grid-column: span 2">Spouse: <strong>${spouseSip}</strong></div>
+        <div style="grid-column: span 2">Values: <strong>${params.realInflation ? 'today’s rupees, after ' + pct(params.realInflation) + ' inflation a year (real returns)' : 'actual rupees, before inflation'}</strong></div>`;
     }
     if (els.printMilestonesTbody) {
       els.printMilestonesTbody.innerHTML = milestoneRowsHtml(result.milestones.filter(m => typeof m.yearReached === 'number').slice(0, 11), result.horizon, 5);
@@ -876,11 +893,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (els.goalSipTitle) els.goalSipTitle.textContent = `Monthly SIP to hit it on time at ${fmtPct(assumed)}`;
 
-    const goalRes = CE.solveGoal(target, years, params, { assumedBlendedReturn: assumed });
+    // Goal maths: with "Target in today's money" on, the target is compared with the plan in today's rupees
+    // (the same as growing the target with inflation). Displayed amounts follow the Today's ₹ view.
+    const inf = inflRate();
+    const goalInfl = !!(els.goalInflation && els.goalInflation.checked) && inf > 0;
+    const gp = Object.assign({}, params, { realInflation: goalInfl ? inf : 0 });
+    const sameUnits = (gp.realInflation || 0) === (params.realInflation || 0);
+    const goalRes = CE.solveGoal(target, years, gp, { assumedBlendedReturn: assumed });
     const cr = (v) => CE.formatINR(v, { compact: true, decimals: 2 });
 
+    const inflNote = document.getElementById('goal-infl-note');
+    if (inflNote) {
+      inflNote.hidden = !goalInfl;
+      if (goalInfl) inflNote.innerHTML = `${cr(target)} today = <strong>${cr(target * Math.pow(1 + inf, years))}</strong> in year ${years} at ${fmtPct(inf)} inflation.`;
+    }
     if (els.goalCurrentCorpus) {
-      els.goalCurrentCorpus.innerHTML = `Your current plan at year ${years}: <strong>${cr(goalRes.currentCorpusAtHorizon)}</strong>`;
+      const viewVal = sameUnits ? goalRes.currentCorpusAtHorizon : CE.calculateSchedule(Object.assign({}, params, { horizon: years })).totalCorpus;
+      const extra = goalInfl && !state.realView ? ` <span class="c-muted">(${cr(goalRes.currentCorpusAtHorizon)} in today’s money)</span>` : '';
+      els.goalCurrentCorpus.innerHTML = `Your current plan at year ${years}: <strong>${cr(viewVal)}</strong>${extra}`;
     }
 
     if (target <= 0) {
@@ -939,8 +969,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const r = k / 1000;
         const rates = CE.ratesForBlended(r, params);
         const sched = CE.calculateSchedule(Object.assign({}, params, rates), planActuals());
-        const reach = CE.yearReaching(sched.yearlyRows, target, 60);
-        const res = CE.requiredSIPAtReturn(target, years, params, r);
+        const schedGoal = sameUnits ? sched : CE.calculateSchedule(Object.assign({}, gp, rates), planActuals());
+        const reach = CE.yearReaching(schedGoal.yearlyRows, target, 60);
+        const res = CE.requiredSIPAtReturn(target, years, gp, r);
         const isChosen = Math.abs(r - assumed) < 0.0006;
         const isPlan = Math.abs(r - planned) < 0.0006;
         const ok = sched.totalInvested > 0;
@@ -1036,19 +1067,28 @@ document.addEventListener('DOMContentLoaded', function () {
     if (atMax || parseInt(input.value, 10) > horizon) input.value = horizon;
   }
 
+  /** Keep three horizons increasing, at least 1 year, and the last within maxH. */
+  function fitHorizons(h, maxH) {
+    let [a, b, c] = h.map(x => Math.round(Number(x) || 0));
+    maxH = Math.max(3, maxH);
+    c = Math.min(Math.max(c, 3), maxH);
+    b = Math.min(Math.max(b, 2), c - 1);
+    a = Math.min(Math.max(a, 1), b - 1);
+    return [a, b, c];
+  }
+
   /**
-   * Youngster Lab: wealth at 50 / 60 / 70 and the cost of delay
+   * Youngster Lab: wealth at three horizons and the cost of delay
    */
   function updateYoungsterLab() {
     if (!els.inpYoungsterAge || !els.youngsterCards) return;
 
-    const currentAge = intOr(els.inpYoungsterAge, 21);
-    // Ages to show (three checkpoints, up to 100); the projection runs to the last one
-    const ages = [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3]
-      .map((el, i) => Math.max(16, Math.min(100, intOr(el, [50, 60, 70][i]))));
-    const checkAges = Array.from(new Set(ages)).sort((a, b) => a - b);
-    while (checkAges.length < 3) checkAges.unshift(Math.max(16, checkAges[0] - 10));
-    const targetAge = Math.max(currentAge + 1, checkAges[checkAges.length - 1]);
+    const currentAge = intOr(els.inpYoungsterAge, 20);
+    // Three horizons (years from now) shown on the cards; the projection runs to the last one, at most age 100
+    const hz = fitHorizons(state.youngHz || [30, 40, 50], 100 - currentAge);
+    state.youngHz = hz;
+    const checkAges = hz.map(h => currentAge + h);
+    const targetAge = checkAges[2];
     const horizon = Math.max(1, targetAge - currentAge);
     const lump = Math.max(0, numOr(els.inpYoungsterLump, 0));
     const waitStep = state.youngWait || 3;
@@ -1076,10 +1116,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (els.dispYoungsterAge) els.dispYoungsterAge.textContent = `${currentAge} yrs`;
     if (els.dispYoungsterHorizon) els.dispYoungsterHorizon.textContent = `${horizon} years`;
     const setT = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
-    setT('disp-youngster-horizon-to', `to ${targetAge}`);
     setT('disp-timeline-end-age', targetAge);
-    [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3].forEach(el => {
-      if (el) el.classList.toggle('is-invalid', intOr(el, 0) <= currentAge);
+    if (els.inpYoungsterHz) {
+      els.inpYoungsterHz.max = Math.max(1, (100 - currentAge) - (hz[2] - hz[0]));
+      els.inpYoungsterHz.value = hz[0];
+    }
+    const ro = document.getElementById('hz-readout');
+    if (ro) ro.innerHTML = `<strong>${hz.join(' · ')} yrs</strong> · ages ${checkAges.join(' · ')}`;
+    document.querySelectorAll('.hz-btn').forEach(b => {
+      const i = parseInt(b.getAttribute('data-hz'), 10), d = parseInt(b.getAttribute('data-d'), 10);
+      const lo = i === 0 ? 1 : hz[i - 1] + 1, hi = i === 2 ? 100 - currentAge : hz[i + 1] - 1;
+      b.disabled = d < 0 ? hz[i] <= lo : hz[i] >= hi;
     });
     if (els.dispYoungsterStepUp) els.dispYoungsterStepUp.textContent = fmtPct(stepUpPct / 100);
     const stepGroup = document.querySelector('.stepup-group[data-who="youngster"]');
@@ -1123,7 +1170,7 @@ document.addEventListener('DOMContentLoaded', function () {
       currentAge, targetAge, monthly, stepUpEnabled, stepUpPct, stepUpMode, stepUpAmt,
       stepUpStopYears, additionsStopYears, additionsStopMonths: addMonths, rate,
       coreRate: yCore, satRate: ySat, coreAlloc: yAlloc,
-      lump, checkpointAges: checkAges,
+      lump, checkpointAges: checkAges, realInflation: viewInflation(),
       delayYearsList: delayList
     });
     const cr = (v, d = 2) => CE.formatINR(v, { compact: true, decimals: d });
@@ -1141,8 +1188,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     };
     const cps = result.checkpoints;
-    const ageTitle = (cp) => `At age ${cp.age}` + (cp.age > currentAge ? ` · in ${cp.age - currentAge} yrs` : '');
-    setT('ykpi-title-1', ageTitle(cps[0])); setT('ykpi-title-2', ageTitle(cps[1])); setT('ykpi-title-3', ageTitle(cps[2]));
+    const ageTitle = (cp) => `At age ${cp.age}` + (cp.age > currentAge ? ` · in ${cp.age - currentAge} yrs` : '') + '<span class="real-tag"> · today’s ₹</span>';
+    ['ykpi-title-1', 'ykpi-title-2', 'ykpi-title-3'].forEach((id, i) => { const el = document.getElementById(id); if (el) el.innerHTML = ageTitle(cps[i]); });
     setAge(els.ykpiCorpus50, els.ykpiCorpus50Exact, els.ykpiMult50, cps[0].corpus, cps[0].multiple, 'Not after the starting age');
     setAge(els.ykpiCorpus60, els.ykpiCorpus60Exact, els.ykpiMult60, cps[1].corpus, cps[1].multiple, 'Not after the starting age');
     setAge(els.ykpiCorpus, els.ykpiCorpusExact, els.ykpiMult70, cps[2].corpus, cps[2].multiple, 'Not after the starting age');
@@ -1187,15 +1234,19 @@ document.addEventListener('DOMContentLoaded', function () {
     {
       const dblBody = document.getElementById('young-doubling-tbody');
       const cw = yAlloc / 100, rc = yCore / 100, rs = ySat / 100;
-      const mixGrowth = (t) => cw * Math.pow(1 + rc, t) + (1 - cw) * Math.pow(1 + rs, t);
+      const vi = viewInflation();
+      const realF = (t) => Math.pow(1 + vi, t);           // today's rupees: divide by inflation
+      const mixGrowth = (t) => (cw * Math.pow(1 + rc, t) + (1 - cw) * Math.pow(1 + rs, t)) / realF(t);
+      const realRate = (r) => (1 + r) / (1 + vi) - 1;
+      const dblAt = (r) => { const x = realRate(r); return x > 0 ? Math.log(2) / Math.log(1 + x) : null; };
       // Years for a lump sum in the mix to double: solve mixGrowth(t) = 2
       let lo = 0, hi = 200;
       for (let i = 0; i < 80; i++) { const m = (lo + hi) / 2; if (mixGrowth(m) >= 2) hi = m; else lo = m; }
       const mixDbl = mixGrowth(200) >= 2 ? (lo + hi) / 2 : null;
       const rows = [
-        { name: 'Fixed deposit', ret: '6.5%', d: Math.log(2) / Math.log(1.065), v: 100000 * Math.pow(1.065, 30) },
-        { name: 'Nifty 50 index', ret: '13%', d: Math.log(2) / Math.log(1.13), v: 100000 * Math.pow(1.13, 30) },
-        { name: 'Core+SAT', ret: `${rate.toFixed(1)}%`, d: mixDbl, v: 100000 * mixGrowth(30), chosen: true }
+        { name: 'Fixed deposit', ret: vi ? `${(realRate(0.065) * 100).toFixed(1)}% real` : '6.5%', d: dblAt(0.065), v: 100000 * Math.pow(1.065, 30) / realF(30) },
+        { name: 'Nifty 50 index', ret: vi ? `${(realRate(0.13) * 100).toFixed(1)}% real` : '13%', d: dblAt(0.13), v: 100000 * Math.pow(1.13, 30) / realF(30) },
+        { name: 'Core+SAT', ret: vi ? `${(realRate(rate / 100) * 100).toFixed(1)}% real` : `${rate.toFixed(1)}%`, d: mixDbl, v: 100000 * mixGrowth(30), chosen: true }
       ];
       if (dblBody) {
         dblBody.innerHTML = rows.map(x => `<tr class="${x.chosen ? 'sensitivity-highlight' : ''}">
@@ -1333,7 +1384,11 @@ document.addEventListener('DOMContentLoaded', function () {
    * to reach the user's goal on time.
    */
   function goalParamsFor(params) {
-    const g = readGoalInputs();
+    const g0 = readGoalInputs();
+    const inf = inflRate();
+    const g = Object.assign({}, g0, { todayTarget: g0.target,
+      target: g0.inflationAdjusted && inf > 0 ? g0.target * Math.pow(1 + inf, g0.years) : g0.target });
+    params = Object.assign({}, params, { realInflation: 0 });
     return { goal: g, params: Object.assign({}, params, { horizon: Math.min(60, Math.max(1, g.years)) }) };
   }
 
@@ -1358,7 +1413,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (u) {
       setText('review-user-name', u.name);
       setText('review-user-id', `User ID: ${u.userId}`);
-      setText('review-goal', `${cr(goal.target)} in ${goal.years} yrs (by ${startYear + goal.years - 1}–${String((startYear + goal.years) % 100).padStart(2, '0')})`);
+      setText('review-goal', `${cr(goal.target)} in ${goal.years} yrs (by ${startYear + goal.years - 1}–${String((startYear + goal.years) % 100).padStart(2, '0')})` +
+        (goal.target !== goal.todayTarget ? ` · ${cr(goal.todayTarget)} in today’s money at ${fmtPct(inflRate())} inflation` : ''));
       setText('review-start', `${startYear}`);
       const logged = Object.keys(state.actualsHistory).length;
       setText('review-logged', logged ? `${logged} (latest: year ${review.latestActualYear})` : 'None yet');
@@ -1667,9 +1723,6 @@ document.addEventListener('DOMContentLoaded', function () {
       els.inpYoungsterAge,
       els.inpYoungsterMonthly,
       els.inpYoungsterLump,
-      els.inpYoungsterAge1,
-      els.inpYoungsterAge2,
-      els.inpYoungsterAge3,
       els.inpYoungsterStepUpEnable,
       els.inpYoungsterStepUpPct,
       els.inpYoungsterStepUpStop,
@@ -1738,6 +1791,28 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
     if (els.inpYoungsterLump) els.inpYoungsterLump.addEventListener('input', syncLumpChips);
+
+    // How far ahead to look: one control moves all three horizons; −/+ on each card moves one
+    const shiftAll = (delta) => {
+      const age = intOr(els.inpYoungsterAge, 20), h = state.youngHz || [30, 40, 50];
+      const maxShift = (100 - age) - h[2], minShift = 1 - h[0];
+      const d = Math.max(minShift, Math.min(maxShift, delta));
+      state.youngHz = h.map(x => x + d);
+      updateYoungsterLab();
+    };
+    if (els.inpYoungsterHz) els.inpYoungsterHz.addEventListener('input', () => {
+      const h = state.youngHz || [30, 40, 50];
+      shiftAll((parseInt(els.inpYoungsterHz.value, 10) || 1) - h[0]);
+    });
+    document.querySelectorAll('[data-hz-shift]').forEach(b => b.addEventListener('click', () => shiftAll(parseInt(b.getAttribute('data-hz-shift'), 10))));
+    document.querySelectorAll('.hz-btn').forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.getAttribute('data-hz'), 10), d = parseInt(b.getAttribute('data-d'), 10);
+      const age = intOr(els.inpYoungsterAge, 20), h = (state.youngHz || [30, 40, 50]).slice();
+      const lo = i === 0 ? 1 : h[i - 1] + 1, hi = i === 2 ? 100 - age : h[i + 1] - 1;
+      h[i] = Math.max(lo, Math.min(hi, h[i] + d));
+      state.youngHz = h;
+      updateYoungsterLab();
+    }));
 
     // Waiting steps: 3, 5 or 10 years
     document.querySelectorAll('.wait-toggle .seg-btn').forEach(btn => {
@@ -1909,12 +1984,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Reset page — restores the inputs of the page you are on, with Undo
   // Youngster lab starting values (also what Reset page restores)
-  const youngsterDefaults = { age: 21, lump: 0, monthly: 10000, enable: true, mode: 'pct', pct: 5, amt: 500, stop: 10, add: 10, addMonths: 0, alloc: 70, core: 17, sat: 27, ages: [50, 60, 70], wait: 3 };
+  const youngsterDefaults = { age: 20, lump: 0, monthly: 10000, enable: true, mode: 'pct', pct: 10, amt: 500, stop: 10, add: 10, addMonths: 0, alloc: 70, core: 17, sat: 27, hz: [30, 40, 50], wait: 3 };
   function readYoungsterInputs() {
     return {
       age: els.inpYoungsterAge.value, monthly: els.inpYoungsterMonthly.value,
       lump: els.inpYoungsterLump ? els.inpYoungsterLump.value : 0,
-      ages: [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3].map(el => el ? el.value : ''),
+      hz: (state.youngHz || [30, 40, 50]).slice(),
       wait: state.youngWait || 3,
       enable: els.inpYoungsterStepUpEnable.checked, mode: els.inpYoungsterStepUpMode.value,
       pct: els.inpYoungsterStepUpPct.value, amt: els.inpYoungsterStepUpAmt.value,
@@ -1925,8 +2000,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function applyYoungsterInputs(v) {
     els.inpYoungsterAge.value = v.age;
-    const ages = v.ages || [50, 60, 70];
-    [els.inpYoungsterAge1, els.inpYoungsterAge2, els.inpYoungsterAge3].forEach((el, i) => { if (el) el.value = ages[i]; });
+    state.youngHz = (v.hz || [30, 40, 50]).slice();
     if (els.inpYoungsterLump) els.inpYoungsterLump.value = v.lump || 0;
     document.querySelectorAll('.quick-young-lump-chips .chip-action').forEach(c => c.classList.toggle('active', parseFloat(c.getAttribute('data-val')) === parseFloat(v.lump || 0)));
     state.youngWait = parseInt(v.wait, 10) || 3;
@@ -1944,10 +2018,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function readPlanTabInputs() {
     return { target: els.goalTarget.value, years: els.goalYears.value, ret: els.goalReturn ? els.goalReturn.value : null,
-      touched: state.goalReturnTouched };
+      touched: state.goalReturnTouched, infl: !!(els.goalInflation && els.goalInflation.checked) };
   }
   function applyPlanTabInputs(v) {
     els.goalTarget.value = v.target; els.goalYears.value = v.years;
+    if (els.goalInflation) els.goalInflation.checked = !!v.infl;
     if (els.goalReturn && v.ret !== null) els.goalReturn.value = v.ret;
     state.goalReturnTouched = v.touched;
     updateAll();
@@ -1965,7 +2040,7 @@ document.addEventListener('DOMContentLoaded', function () {
         () => { applyParamsToInputs(before); updateAll(); });
     } else if (tab === 'tab-plan') {
       const before = readPlanTabInputs();
-      const g = u ? u.goal : { target: 100000000, years: 20, assumedReturn: null };
+      const g = u ? u.goal : { target: 100000000, years: 20, assumedReturn: null, inflationAdjusted: false };
       applyGoalToInputs(g);
       if (!(g.assumedReturn !== undefined && g.assumedReturn !== null)) state.goalReturnTouched = false;
       updateAll();
@@ -1994,7 +2069,7 @@ document.addEventListener('DOMContentLoaded', function () {
     selfInclude: false, selfStepUpOn: false, selfMonthly: 10000, selfAddStop: 10, selfAddStopMonths: 0, selfStepUpStop: 10,
     spouseInclude: false, spouseStepUpOn: false
   }, o);
-  const youngPreset = (o) => Object.assign({}, youngsterDefaults, { lump: 0, enable: false, add: 999, stop: 10, alloc: 100, core: 18, sat: 25, ages: [50, 60, 70], wait: 3 }, o);
+  const youngPreset = (o) => Object.assign({}, youngsterDefaults, { lump: 0, enable: false, add: 999, stop: 10, alloc: 100, core: 18, sat: 25, hz: [30, 40, 50], wait: 3 }, o);
   const familyModel = (name, c, s) => ({
     id: 'family-' + name.toLowerCase(), title: `Model ${name} · core ${c}% / satellite ${s}%`,
     sub: '₹1 Cr at 40 + ₹80,000 a month, 70 : 30, to 60', tab: 'tab-core',
@@ -2003,45 +2078,48 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   const PRESET_GROUPS = [
-    { title: 'One lakh, ten years', hint: 'Core engine · slide 11', items: [
-      { id: 'tenx', title: '10× in 10 years', sub: '₹1 L at 26%, all in core, no SIP', tab: 'tab-core',
+    { title: 'Core engine', hint: 'Slide 11', items: [
+      { id: 'tenx', title: '10X in 10 Yrs @26%', sub: '₹1 L lump sum, all in core, no SIP, 10 years', tab: 'tab-core',
         core: corePreset({ coreAlloc: 100, coreRet: 26, satRet: 33, horizon: 10, selfLump: 100000 }),
         note: '₹1 lakh compounding at 26% a year. By the Rule of 72 it doubles about every 2.8 years, so it is near 10× by year 10. Hover over year 5 to see what selling halfway would leave behind.' },
-      { id: 'tenx-7030', title: 'Same, split 70 : 30', sub: 'Core 23% + satellite 33% = 26% blended', tab: 'tab-core',
+      { id: 'tenx-7030', title: '10X in 10 Yrs @26% 70:30 Split', sub: 'Core 23% + satellite 33% = 26% blended', tab: 'tab-core',
         core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000 }),
         note: 'Same ₹1 lakh and the same 26% blended CAGR, split 70 : 30 with a 10-point gap. The satellite is never rebalanced, so it becomes a bigger share and the end value beats plain 26%. Compare the corpus and the Portfolio IRR with the previous preset.' },
-      { id: 'tenx-sip', title: '+ ₹10,000 monthly SIP', sub: '70 : 30, no step-up, for 10 years', tab: 'tab-core',
-        core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000, selfInclude: true }),
-        note: 'The same 70 : 30 portfolio with ₹10,000 added every month for 10 years and no step-up. Compare what was put in with what compounding added.' },
-      { id: 'tenx-spouse', title: '+ spouse investing too', sub: 'Spouse ₹1 L + ₹10,000 a month, no step-up', tab: 'tab-core',
-        core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000, selfInclude: true,
-          spouseInclude: true, spouseLump: 100000, spouseMonthly: 10000, spouseAddStop: 10, spouseStepUpStop: 10 }),
-        note: 'Both partners invest ₹1 lakh plus ₹10,000 a month. The strip under the chart compares self only with both of you, and how much sooner the same corpus is reached.' }
+      { id: 'sip18', title: '₹10,000 monthly SIP @18%', sub: 'All in core, no step-up, SIP for 10 years', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 10, selfLump: 0, selfInclude: true, selfMonthly: 10000, selfAddStop: 10 }),
+        note: '₹10,000 every month for 10 years at 18%, with no step-up and no lump sum. Compare what went in with what compounding added.' },
+      { id: 'sip18-spouse', title: '₹10,000 monthly SIP @18% + spouse investing', sub: 'Spouse adds ₹10,000 a month too', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 10, selfLump: 0, selfInclude: true, selfMonthly: 10000, selfAddStop: 10,
+          spouseInclude: true, spouseLump: 0, spouseMonthly: 10000, spouseAddStop: 10, spouseStepUpStop: 10 }),
+        note: 'Both partners invest ₹10,000 a month for 10 years at 18%. The strip under the chart compares self only with both of you, and how much sooner the same corpus is reached.' }
     ] },
     { title: 'Youngster lab', hint: 'Plain 18% vs 70 : 30', items: [
-      { id: 'y20', title: 'Age 20 · ₹10,000 a month · plain 18%', sub: 'All in core, no step-up, after 30, 40, 50 yrs', tab: 'tab-youngsters',
+      { id: 'y20', title: 'Age 20 · ₹10,000 a month · @ 18%', sub: 'All in core, no step-up, SIP to 70', tab: 'tab-youngsters',
         young: youngPreset({ age: 20, monthly: 10000 }),
         note: '₹10,000 every month from age 20 to 70 at a plain 18%, no step-up. The cards show wealth after 30, 40 and 50 years.' },
-      { id: 'y20-7030', title: 'Same, split 70 : 30', sub: 'Core 15% + satellite 25% = 18% blended', tab: 'tab-youngsters',
+      { id: 'y20-7030', title: 'Age 20 · ₹10,000 a month · @ 18% split 70 : 30', sub: 'Core 15% + satellite 25% = 18% blended, SIP to 70', tab: 'tab-youngsters',
         young: youngPreset({ age: 20, monthly: 10000, alloc: 70, core: 15, sat: 25 }),
         note: 'The same SIP and the same 18% blended CAGR, split 70 : 30. Without rebalancing the satellite takes over, so each card is well above the plain 18% figures.' },
-      { id: 'y20-step', title: 'Age 20 · 10% step-up, stop after 10 yrs · plain 18%', sub: 'SIP and step-up end after 10 years', tab: 'tab-youngsters',
+      { id: 'y20-10', title: 'Age 20 · ₹10,000 a month · @18% · SIP 10 yrs', sub: 'SIP for 10 years only, no step-up, then left alone', tab: 'tab-youngsters',
+        young: youngPreset({ age: 20, monthly: 10000, add: 10 }),
+        note: '₹10,000 a month for just 10 years, from 20 to 30, then never touched, at a plain 18%. Compare with investing all the way to 70.' },
+      { id: 'y20-step', title: 'Age 20 · ₹10,000 a month · @18% 10% step-up, SIP 10 yrs', sub: 'SIP rises 10% a year for 10 years, then stops', tab: 'tab-youngsters',
         young: youngPreset({ age: 20, monthly: 10000, enable: true, mode: 'pct', pct: 10, stop: 10, add: 10 }),
-        note: '₹10,000 a month rising 10% a year, invested for only 10 years, then left alone to compound to 70 at a plain 18%.' },
-      { id: 'y20-step-7030', title: 'Same, split 70 : 30', sub: 'Core 15% + satellite 25%', tab: 'tab-youngsters',
+        note: '₹10,000 a month rising 10% a year, invested for 10 years, then left alone to compound at a plain 18%.' },
+      { id: 'y20-step-7030', title: 'Age 20 · ₹10,000 a month · @18% 10% step-up, SIP 10 yrs, split 70 : 30', sub: 'Core 15% + satellite 25%', tab: 'tab-youngsters',
         young: youngPreset({ age: 20, monthly: 10000, enable: true, mode: 'pct', pct: 10, stop: 10, add: 10, alloc: 70, core: 15, sat: 25 }),
         note: 'Ten years of stepped-up SIPs, then hands off, now split 70 : 30 at the same 18% blended CAGR.' },
-      { id: 'y40', title: 'Age 40 · ₹25 L lump sum · plain 18%', sub: 'No SIP, after 30, 40, 50 yrs', tab: 'tab-youngsters',
-        young: youngPreset({ age: 40, lump: 2500000, monthly: 0, ages: [70, 80, 90] }),
+      { id: 'y40', title: 'Age 40 · ₹25 L lump sum · plain 18%', sub: 'No SIP, after 30, 40 and 50 years', tab: 'tab-youngsters',
+        young: youngPreset({ age: 40, lump: 2500000, monthly: 0, hz: [30, 40, 50] }),
         note: '₹25 lakh invested once at 40 and never touched, at a plain 18%. The cards show it after 30, 40 and 50 years (ages 70, 80, 90): money that outlives the person who built it.' },
-      { id: 'y40-7030', title: 'Same, split 70 : 30', sub: 'Core 15% + satellite 25%', tab: 'tab-youngsters',
-        young: youngPreset({ age: 40, lump: 2500000, monthly: 0, ages: [70, 80, 90], alloc: 70, core: 15, sat: 25 }),
+      { id: 'y40-7030', title: 'Age 40 · ₹25 L lump sum · plain 18%, split 70 : 30', sub: 'Core 15% + satellite 25%', tab: 'tab-youngsters',
+        young: youngPreset({ age: 40, lump: 2500000, monthly: 0, hz: [30, 40, 50], alloc: 70, core: 15, sat: 25 }),
         note: 'The same ₹25 lakh split 70 : 30 at the same 18% blended CAGR. Over 30 to 50 years the unrebalanced satellite makes the gap enormous.' }
     ] },
     { title: 'The family math', hint: 'Slide 12 · Models A to D', items: [
       familyModel('A', 15, 20), familyModel('B', 18, 25), familyModel('C', 18, 30), familyModel('D', 20, 40)
     ] },
-    { title: 'More from the slides', hint: 'Slides 11 and 13', items: [
+    { title: 'More presets', hint: 'Slides 11 and 13 · inflation', items: [
       { id: 'ten-lakh', title: '₹10 L at 18% for 30 years', sub: 'Compound vs linear · slide 11', tab: 'tab-core',
         core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 30, selfLump: 1000000 }),
         note: 'About 143× by year 30, against 6.4× at simple interest. The 25 / 50 / 75% markers show most of the money arriving in the last decade. Hover over years 10 and 20.' },
@@ -2050,15 +2128,22 @@ document.addEventListener('DOMContentLoaded', function () {
         goal: { target: 100000000, years: 30, assumedReturn: null },
         note: 'The CAGR table shows what ₹10 lakh becomes by year 30 at each rate, and when it reaches ₹10 Cr. Change Horizon on the Core engine to 10 or 20 for the other columns of the slide.' },
       { id: 'start-21', title: '₹10,000 a month from 21 · a 10-year delay', sub: 'Plain 18%, at 40, 50, 60 · slide 13', tab: 'tab-youngsters',
-        young: youngPreset({ age: 21, monthly: 10000, ages: [40, 50, 60], wait: 10 }),
+        young: youngPreset({ age: 21, monthly: 10000, hz: [19, 29, 39], wait: 10 }),
         note: '₹10,000 a month from 21 at 18%, checked at 40, 50 and 60. The first waiting card starts at 31 instead: compare the two at 60 to see what ten years of delay costs.' },
       { id: 'leave-20', title: 'Stop at 50, leave it 20 more years', sub: '₹10,000 a month from 21 to 50 · slide 13', tab: 'tab-youngsters',
-        young: youngPreset({ age: 21, monthly: 10000, add: 29, ages: [50, 60, 70] }),
+        young: youngPreset({ age: 21, monthly: 10000, add: 29, hz: [29, 39, 49] }),
         note: 'SIPs stop at 50. If the children leave the money alone for 20 more years, compare the wealth at 50 with the wealth at 70.' },
       { id: 'ff-40', title: '₹25 L at 40 · when is ₹3 Cr reached?', sub: 'Freedom number · slide 13', tab: 'tab-plan',
-        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 20, selfLump: 2500000 }),
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 20, selfLump: 2500000, selfAddStop: 20, selfStepUpStop: 20 }),
         goal: { target: 30000000, years: 20, assumedReturn: null },
-        note: 'Freedom number ₹3 Cr (25 × ₹12 lakh a year). “When your current plan gets there” gives the year at 18%; add 40 for the age. The CAGR table shows 12%, 18% and 26% side by side, with the value at 60.' }
+        note: 'Freedom number ₹3 Cr (25 × ₹12 lakh a year). “When your current plan gets there” gives the year at 18%; add 40 for the age. The CAGR table shows 12%, 18% and 26% side by side, with the value at 60.' },
+      { id: 'ff-40-real', title: '₹25 L at 40 · ₹3 Cr in today’s money', sub: 'Inflation-adjusted freedom number', tab: 'tab-plan',
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 20, selfLump: 2500000, selfAddStop: 20, selfStepUpStop: 20 }),
+        goal: { target: 30000000, years: 20, assumedReturn: null, inflationAdjusted: true },
+        note: 'The same ₹3 Cr, but in today’s money: it grows with the inflation rate in the tab bar, so freedom comes later. The note under the target shows what ₹3 Cr becomes by 60; the SIP card shows the monthly top-up that still gets there on time.' },
+      { id: 'ten-lakh-real', title: '₹10 L at 18% for 30 years · in today’s ₹', sub: 'Same as above, after inflation', tab: 'tab-core', real: true,
+        core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 30, selfLump: 1000000 }),
+        note: 'The same ₹10 lakh at 18%, shown in today’s rupees: what the corpus would buy now after inflation, and the real return. Press “Show actual ₹” to switch back.' }
     ] }
   ];
   const PRESET_LIST = [];
@@ -2121,17 +2206,20 @@ document.addEventListener('DOMContentLoaded', function () {
   function applyPreset(id, withUndo = true) {
     const p = PRESET_LIST.find(x => x.id === id);
     if (!p) return;
-    const before = { core: readInputsForProfile(), plan: readPlanTabInputs(), young: readYoungsterInputs(), tab: state.activeTab || 'tab-core', preset: state.presetId };
+    const before = { core: readInputsForProfile(), plan: readPlanTabInputs(), young: readYoungsterInputs(), tab: state.activeTab || 'tab-core', preset: state.presetId, real: state.realView };
     state.presetId = p.id;
+    state.realView = !!p.real;
+    try { localStorage.setItem('compounding_calculator_real_view', state.realView ? '1' : '0'); } catch (e) { /* ignore */ }
     if (p.core) applyParamsToInputs(p.core);
-    if (p.goal) { applyGoalToInputs(p.goal); state.goalReturnTouched = false; }
+    if (p.goal) { applyGoalToInputs(Object.assign({ inflationAdjusted: false }, p.goal)); state.goalReturnTouched = false; }
     if (p.young) applyYoungsterInputs(p.young);
     switchToTab(p.tab);
-    updateAll();
+    refreshAllPages();
     showPresetNote(p);
     document.querySelectorAll('.toast-message.is-preset').forEach(t => t.remove());
     if (withUndo) {
       const t = showToast(`Preset: ${escapeHtml(p.title)}`, '▶', () => {
+        state.realView = before.real;
         applyParamsToInputs(before.core); applyPlanTabInputs(before.plan); applyYoungsterInputs(before.young);
         const back = before.preset ? PRESET_LIST.find(x => x.id === before.preset) : null;
         state.presetId = back ? back.id : null;
@@ -2169,6 +2257,39 @@ document.addEventListener('DOMContentLoaded', function () {
   bindClick('btn-preset-prev', () => stepPreset(-1));
   bindClick('btn-preset-next', () => stepPreset(1));
   bindClick('btn-preset-close', clearPreset);
+
+  // ---------- Inflation: rate, today's-rupee view ----------
+  function renderInflationState() {
+    document.body.classList.toggle('is-real', !!state.realView);
+    const b = document.getElementById('btn-real-view');
+    if (b) b.setAttribute('aria-pressed', state.realView ? 'true' : 'false');
+    const n = document.getElementById('real-note');
+    if (n) n.hidden = !state.realView;
+    const r = document.getElementById('real-note-rate');
+    if (r) r.textContent = fmtPct(inflRate());
+    if (els.inpInflation && document.activeElement !== els.inpInflation) els.inpInflation.value = state.inflation;
+    const gl = document.querySelector('.goal-infl-label');
+    if (gl) gl.textContent = `Target in today’s money (grows at ${fmtPct(inflRate())} inflation)`;
+  }
+  function refreshAllPages() { updateAll(); updateYoungsterLab(); }
+  function setRealView(on) {
+    state.realView = !!on;
+    try { localStorage.setItem('compounding_calculator_real_view', on ? '1' : '0'); } catch (e) { /* ignore */ }
+    refreshAllPages();
+  }
+  if (els.inpInflation) {
+    els.inpInflation.addEventListener('input', () => {
+      const v = parseFloat(els.inpInflation.value);
+      if (isNaN(v)) return;
+      state.inflation = Math.max(0, Math.min(15, v));
+      try { localStorage.setItem('compounding_calculator_inflation', String(state.inflation)); } catch (e) { /* ignore */ }
+      refreshAllPages();
+    });
+    els.inpInflation.addEventListener('change', () => { els.inpInflation.value = state.inflation; });
+  }
+  bindClick('btn-real-view', () => setRealView(!state.realView));
+  bindClick('btn-real-off', () => setRealView(false));
+  if (els.goalInflation) els.goalInflation.addEventListener('change', updateAll);
 
   // ---------- Help: manuals shown inside the app ----------
   const HELP_SECTION = { 'tab-core': 'core', 'tab-plan': 'goal', 'tab-actuals': 'review', 'tab-youngsters': 'youngster' };
@@ -2406,7 +2527,7 @@ document.addEventListener('DOMContentLoaded', function () {
       createdAt: t, updatedAt: t,
       startYear: startYear || thisYear(),
       params: params || defaultPlanParams(),
-      goal: goal || { target: 100000000, years: 20, assumedReturn: null },
+      goal: goal || { target: 100000000, years: 20, assumedReturn: null, inflationAdjusted: false },
       actualsHistory: actualsHistory || {}
     };
   }
@@ -2435,7 +2556,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updatedAt: prof.updatedAt || createdAt,
         startYear: prof.startYear || new Date(createdAt).getFullYear(),
         params: Object.assign(defaultPlanParams(), prof.params || {}),
-        goal: Object.assign({ target: 100000000, years: 20, assumedReturn: null }, prof.goal || {}),
+        goal: Object.assign({ target: 100000000, years: 20, assumedReturn: null, inflationAdjusted: false }, prof.goal || {}),
         actualsHistory: prof.actualsHistory || {}
       });
     }
@@ -2767,6 +2888,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (goal.years !== undefined && els.goalYears) els.goalYears.value = goal.years;
     state.goalReturnTouched = goal.assumedReturn !== undefined && goal.assumedReturn !== null;
     if (state.goalReturnTouched && els.goalReturn) els.goalReturn.value = goal.assumedReturn;
+    if (els.goalInflation) els.goalInflation.checked = !!goal.inflationAdjusted;
   }
 
   function loadProfile(profileId, showToastNotice = false) {
@@ -2820,7 +2942,8 @@ document.addEventListener('DOMContentLoaded', function () {
     return {
       target: numOr(els.goalTarget, 100000000),
       years: Math.max(1, intOr(els.goalYears, 20)),
-      assumedReturn: state.goalReturnTouched ? numOr(els.goalReturn, null) : null
+      assumedReturn: state.goalReturnTouched ? numOr(els.goalReturn, null) : null,
+      inflationAdjusted: !!(els.goalInflation && els.goalInflation.checked)
     };
   }
 
@@ -2831,7 +2954,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const sameParams = JSON.stringify(Object.assign(defaultPlanParams(), u.params)) === JSON.stringify(Object.assign(defaultPlanParams(), readInputsForProfile()));
     const g = readGoalInputs();
     const sameGoal = Number(u.goal.target) === Number(g.target) && Number(u.goal.years) === Number(g.years) &&
-      (u.goal.assumedReturn ?? null) === (g.assumedReturn ?? null);
+      (u.goal.assumedReturn ?? null) === (g.assumedReturn ?? null) && !!u.goal.inflationAdjusted === !!g.inflationAdjusted;
     const dirty = !(sameParams && sameGoal);
     if (els.btnSaveProfile) els.btnSaveProfile.classList.toggle('is-dirty', dirty);
     const pill = document.getElementById('db-status');
@@ -2924,7 +3047,7 @@ document.addEventListener('DOMContentLoaded', function () {
     users[r.id] = makeUser({
       userId: r.id, name: r.name,
       params: template === 'current' ? readInputsForProfile() : defaultPlanParams(),
-      goal: { target: r.goal.target, years: r.goal.years, assumedReturn: null },
+      goal: { target: r.goal.target, years: r.goal.years, assumedReturn: null, inflationAdjusted: false },
       startYear: r.startYear,
       actualsHistory: {}
     });

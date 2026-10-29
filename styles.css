@@ -1278,3 +1278,44 @@ details.schedule-card[open] > summary { margin-bottom: 10px; }
   .preset-wrap { position: static; }
   .preset-menu { left: 0; right: 0; width: auto; top: calc(100% + 4px); }
 }
+
+/* ---------- Inflation: rate, today's-rupee view, inflation-adjusted goal ---------- */
+.infl-group { display: flex; align-items: center; gap: 6px; padding-right: 10px; margin-right: 2px; border-right: 1px solid var(--line); }
+.infl-label { font-size: 0.78rem; color: var(--text-muted); }
+.infl-input { display: inline-flex; align-items: center; gap: 3px; font-size: 0.8rem; color: var(--text-muted); }
+.infl-input .form-input { width: 58px; height: 30px; padding: 0 4px; text-align: center; font-weight: 600; font-size: 0.86rem; }
+#btn-real-view[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); border-color: transparent; }
+.real-tag { display: none; color: var(--gold); font-weight: 500; }
+body.is-real .real-tag { display: inline; }
+.real-note {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  margin: 0 0 10px; padding: 6px 10px 6px 14px; border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--gold) 9%, var(--panel));
+  border: 1px dashed color-mix(in srgb, var(--gold) 55%, transparent);
+}
+.real-note p { font-size: 0.84rem; color: var(--text-secondary); flex: 1; min-width: 0; }
+.real-note strong { color: var(--gold); }
+.goal-infl { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.goal-infl-label { font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; }
+@media (max-width: 760px) {
+  .infl-group { border-right: 0; padding-right: 0; }
+}
+
+/* ---------- Youngster lab: how far ahead to look ---------- */
+.horizon-bar { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; margin: 2px 0 10px; }
+.horizon-label { font-family: var(--font-display); font-weight: 700; font-size: 1rem; }
+.horizon-stepper { flex: 1; min-width: 200px; max-width: 520px; }
+.horizon-readout { font-size: 0.86rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.horizon-readout strong { color: var(--gold); font-weight: 700; }
+.kpi-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hz-steps { display: inline-flex; gap: 4px; flex: none; }
+.hz-btn {
+  width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center;
+  font-weight: 700; font-size: 0.9rem; line-height: 1; color: var(--text-secondary);
+  background: var(--panel-2); border: 1px solid var(--line-strong);
+}
+.hz-btn:hover { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 55%, transparent); }
+.hz-btn:disabled { opacity: .35; cursor: default; }
+@media (max-width: 760px) {
+  .nav-right { flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+}
