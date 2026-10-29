@@ -2,7 +2,7 @@
 
 Core + Satellite compounding calculator for the TechnoFunda method. Owner and developer: **Sathiya Sekhar E**.
 Live site: https://esathiyasekhar.github.io/CompoundingCalc/ (GitHub Pages, deploys from `main`, root folder).
-Current version: **1.14** (29 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
+Current version: **1.15** (29 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
 
 ## What it is
 
@@ -15,7 +15,7 @@ Plain HTML/CSS/JavaScript. No framework, no build step, no server. Opens from `f
 | `calculator.js` | The engine (`window.CompoundingEngine`, also a Node module). No DOM access. `calculateSchedule`, `solveGoal`, `reviewActualsAndCorrect`, `calculateYoungsterWealth`, `solveIRR`, `ratesForBlended`, `formatINR` |
 | `app.js` | Interface: reads inputs → engine → renders cards, tables, canvas charts; users/storage/database file; presets; inflation; Help |
 | `manual/` | User manual and Design manual (HTML shown inside the app via Help/F1, plus PDFs), `manual.css`, `manual.js`, screenshots in `img/` |
-| `test_runner.html`, `test_milestones.html` | Engine test pages (must end with “ALL 8 TEST SUITES PASSED”) |
+| `test_runner.html`, `test_milestones.html` | Engine test pages (must end with “ALL 10 TEST SUITES PASSED”) |
 | `installer/` | Go source for the Windows launcher and per-user setup program (`build.ps1` / `build.sh` → `dist/CompoundingCalculator-Setup.exe`) |
 | `tools/` | Playwright scripts: `smoke-test.js`, `screenshots.js`, `manual-pdfs.js`, and a tiny static `server.js` |
 

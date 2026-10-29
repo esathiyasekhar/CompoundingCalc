@@ -412,6 +412,7 @@ input[type="number"]::-webkit-inner-spin-button { opacity: .5; }
 
 .fade-block { transition: opacity .2s; }
 .fade-block.is-off { opacity: .45; pointer-events: none; }
+.fade-block.is-off.type-on { pointer-events: auto; }   /* 1.15: faded SIP / spouse boxes stay editable */
 
 /* Chips */
 .quick-lump-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }

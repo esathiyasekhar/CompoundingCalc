@@ -97,7 +97,20 @@
       log(`TEST H (Youngster Zero Monthly): Invested=${youngsterResZero.totalInvested}, Corpus=${youngsterResZero.corpus}, Multiple=${youngsterResZero.multiple}`);
       if (youngsterResZero.totalInvested !== 0 || youngsterResZero.corpus !== 0) throw new Error('Test H Failed');
 
-      log('SUCCESS: ALL 8 TEST SUITES PASSED FLAWLESSLY!');
+      // Scenario I (1.15): 0% return — IRR exactly 0, no doubling time, corpus = money invested
+      const resI = CE.calculateSchedule(Object.assign({}, pA, { coreReturn: 0, satReturn: 0 }));
+      log(`TEST I (0% return): IRR=${resI.portfolioIRR}, Doubling=${resI.doublingTimeAtIRR}, Corpus=${resI.totalCorpus.toFixed(0)}, Invested=${resI.totalInvested.toFixed(0)}`);
+      if (resI.portfolioIRR !== 0 || resI.doublingTimeAtIRR !== 0) throw new Error('Test I Failed: IRR and doubling time should be exactly 0');
+      if (Math.abs(resI.totalCorpus - resI.totalInvested) > 1) throw new Error('Test I Failed: corpus should equal invested');
+
+      // Scenario J (1.15): review after year 7 of a 7 yrs 6 months SIP — the 6 months left count as planned SIP
+      const pJ = Object.assign({}, pA, { selfAddStopMonths: 6 });
+      const actsJ = {}; for (let y = 1; y <= 7; y++) actsJ[y] = { coreReturn: 0.10, satReturn: 0.12 };
+      const reviewJ = CE.reviewActualsAndCorrect(pJ, actsJ);
+      log(`TEST J (Review, extra SIP months left): Mode=${reviewJ.sipMode}, PlannedFutureMonthly=${reviewJ.plannedFutureMonthly.toFixed(0)}, ReqFutureSIP=${reviewJ.requiredFutureSIP}`);
+      if (reviewJ.sipMode !== 'scale' || !(reviewJ.plannedFutureMonthly > 0)) throw new Error('Test J Failed: the extra months should count as planned SIP');
+
+      log('SUCCESS: ALL 10 TEST SUITES PASSED FLAWLESSLY!');
     } catch (err) {
       log('FAILED: ' + err.message);
     }

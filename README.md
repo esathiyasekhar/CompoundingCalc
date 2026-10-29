@@ -1,6 +1,6 @@
 # Compounding Calculator
 
-**Core + Satellite wealth engine · v1.14 · Developed by Sathiya Sekhar E**
+**Core + Satellite wealth engine · v1.15 · Developed by Sathiya Sekhar E**
 
 A planning tool for long-term equity investors. It shows how a portfolio split into a steady **core** and a faster-growing **satellite** compounds over time, how much of the final money comes from compounding rather than from what you put in, and what it takes to reach a goal.
 
@@ -93,7 +93,7 @@ styles.css          design tokens (dark and light), components, print styles
 calculator.js       the calculation engine (no page access; also usable from Node)
 app.js              interface, charts, users, storage, Help
 manual/             user and design manuals (HTML + PDF) and screenshots
-test_runner.html    engine test suites; should end with "ALL 8 TEST SUITES PASSED"
+test_runner.html    engine test suites; should end with "ALL 10 TEST SUITES PASSED"
 test_milestones.html  Youngster lab checkpoints at 50, 60 and 70
 ```
 
@@ -136,4 +136,4 @@ Projections, not promises. Every result assumes the same return every year, and 
 
 ---
 
-Compounding Calculator v1.14 · 29 Oct 2026 · Developed by **Sathiya Sekhar E**
+Compounding Calculator v1.15 · 29 Oct 2026 · Developed by **Sathiya Sekhar E**

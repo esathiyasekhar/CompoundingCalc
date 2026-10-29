@@ -287,11 +287,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.14',
+    version: '1.15',
     date: '2026-10-29',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.15', date: '2026-10-29', notes: [
+        'Spouse and SIP boxes can be typed in while switched off; typing an amount switches them on',
+        'A 0% return shows the Portfolio IRR and doubling time as —, never “0.00%” or an endless doubling time',
+        'Annual review: a last SIP year with extra months counts as planned SIP when working out the SIP needed'
+      ] },
       { version: '1.14', date: '2026-10-29', notes: [
         'Inflation view button renamed INF_ADJ ON / OFF',
         'More ways to set inflation: − / + in the tab bar, a slider and 4–8% chips in the INF_ADJ strip, chips beside the inflation-adjusted goal',
@@ -479,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (els.selfAdditionsContainer) els.selfAdditionsContainer.classList.toggle('is-off', !params.selfInclude);
     const selfMonthlyGroup = els.selfMonthly ? els.selfMonthly.closest('.form-group') : null;
-    if (selfMonthlyGroup) selfMonthlyGroup.classList.toggle('fade-block', true), selfMonthlyGroup.classList.toggle('is-off', !params.selfInclude);
+    if (selfMonthlyGroup) selfMonthlyGroup.classList.add('fade-block', 'type-on'), selfMonthlyGroup.classList.toggle('is-off', !params.selfInclude);
     els.spouseContainer.classList.toggle('is-off', !params.spouseInclude);
 
     // 2. Main schedule (with any logged actual years)
@@ -1847,6 +1852,12 @@ document.addEventListener('DOMContentLoaded', function () {
     els.goalTarget, els.goalYears, els.selfStepUpAmt, els.spouseStepUpAmt,
     els.selfAddStopMonths, els.spouseAddStopMonths, els.selfStepUpEnable, els.spouseStepUpEnable
   ];
+
+  // 1.15: the faded boxes stay editable; typing an amount switches the monthly SIP / the spouse on
+  // (registered before updateAll so the new amount is counted at once)
+  [[els.selfMonthly, els.selfInclude], [els.spouseLump, els.spouseInclude], [els.spouseMonthly, els.spouseInclude]].forEach(([inp, sw]) => {
+    if (inp && sw) inp.addEventListener('input', () => { if (!sw.checked && Number(inp.value) > 0) sw.checked = true; });
+  });
 
   reactiveInputs.forEach(input => {
     if (!input) return;

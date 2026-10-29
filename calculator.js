@@ -507,8 +507,9 @@
     const irrFlows = [{ t: 0, cf: -totalLump }];
     contribFlows.forEach(f => { if (f.yr <= h && f.cf > 0) irrFlows.push({ t: f.t, cf: -f.cf }); });
     irrFlows.push({ t: h, cf: totalCorpus[h] });
-    const portfolioIRR = (totalInvested[h] > 0 && totalCorpus[h] > 0) ? solveIRR(irrFlows) : 0;
-    const doublingTimeAtIRR = (portfolioIRR > 0 && totalCorpus[h] > 0) ? Math.log(2) / Math.log(1 + portfolioIRR) : 0;
+    const irrRaw = (totalInvested[h] > 0 && totalCorpus[h] > 0) ? solveIRR(irrFlows) : 0;
+    const portfolioIRR = Math.abs(irrRaw) < 1e-9 ? 0 : irrRaw;   // 1.15: 0 % return → IRR exactly 0 (rounding noise gave "0.00%" and endless doubling)
+    const doublingTimeAtIRR = (portfolioIRR >= 1e-9 && totalCorpus[h] > 0) ? Math.log(2) / Math.log(1 + portfolioIRR) : 0;
     const nominalWeighted = (coreAlloc * Number(p.coreReturn)) + (satAlloc * Number(p.satReturn));
     // In today's rupees the blended CAGR is the real rate (1 + r) / (1 + inflation) − 1
     const weightedStartingReturn = realInflation > 0 ? (1 + nominalWeighted) / (1 + realInflation) - 1 : nominalWeighted;
@@ -813,8 +814,11 @@
     const fromYear = latestActualYear + 1;
 
     // Planned self monthly SIP in year y (before any correction)
+    // 1.15: a last SIP year with extra months (selfAddStopMonths) counts as planned SIP too
     const plannedSelfMonthlyIn = (y) => {
-      if (!baseParams.selfInclude || y > baseParams.selfAddStop) return 0;
+      const extraMonths = Math.max(0, Math.min(11, Math.round(Number(baseParams.selfAddStopMonths) || 0)));
+      if (!baseParams.selfInclude) return 0;
+      if (y > baseParams.selfAddStop && !(y === baseParams.selfAddStop + 1 && extraMonths > 0)) return 0;
       return steppedMonthly(baseParams.selfMonthly, y, baseParams.selfStepUpStop,
         baseParams.selfStepUpMode, baseParams.selfStepUp, baseParams.selfStepUpAmt);
     };

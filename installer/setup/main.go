@@ -22,7 +22,7 @@ var payload embed.FS
 
 const (
 	appName    = "Compounding Calculator"
-	appVersion = "1.14"
+	appVersion = "1.15"
 	regKey     = `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\CompoundingCalculator`
 
 	mbOK          = 0x0

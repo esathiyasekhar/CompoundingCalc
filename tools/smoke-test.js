@@ -13,7 +13,7 @@ const { start, blockFonts } = require('./server');
   p.on('dialog', d => d.accept());
 
   await p.goto(srv.url + 'test_runner.html'); await p.waitForTimeout(1500);
-  check(/ALL 8 TEST SUITES PASSED/.test(await p.textContent('body')), 'engine test suites');
+  check(/ALL 10 TEST SUITES PASSED/.test(await p.textContent('body')), 'engine test suites');
 
   await p.goto(srv.url + 'index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(800);
   const v = await p.evaluate(() => ({ meta: document.querySelector('meta[name="app-version"]').content, labels: [...document.querySelectorAll('[data-app="version"]')].map(e => e.textContent), title: document.title }));

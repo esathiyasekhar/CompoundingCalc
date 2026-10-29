@@ -7,15 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="manual.css?v=1.14">
-<script src="manual.js?v=1.14"></script>
+<link rel="stylesheet" href="manual.css?v=1.15">
+<script src="manual.js?v=1.15"></script>
 </head>
 <body>
 <div class="manual">
 
 <nav class="toc" aria-label="Contents">
   <p class="toc-title">Design manual</p>
-  <p class="toc-sub">Compounding Calculator v1.14</p>
+  <p class="toc-sub">Compounding Calculator v1.15</p>
   <ol>
     <li><a href="#purpose">Purpose and principles</a></li>
     <li><a href="#architecture">Architecture</a></li>
@@ -53,7 +53,7 @@
     <h1>Compounding <span>Calculator</span></h1>
     <p class="cover-lede">How the calculator is built: the files, every formula and solver, the data model, the visual system, the Windows installer and the web edition.</p>
     <ul class="cover-meta">
-      <li>Version <strong>1.14</strong></li>
+      <li>Version <strong>1.15</strong></li>
       <li>Released <strong>29 Oct 2026</strong></li>
       <li>Developed by <strong>Sathiya Sekhar E</strong></li>
     </ul>
@@ -93,6 +93,7 @@
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
       <tbody>
+        <tr><td><b>1.15</b></td><td class="nowrap">29 Oct 2026</td><td>Fixes from the Finance Hub planner: faded Self SIP and Spouse boxes stay editable and typing an amount switches them on; Portfolio IRR exactly 0 at a 0% return (shown as —, no doubling time); the Annual review counts a last SIP year with extra months as planned SIP. Two new engine suites (I, J).</td></tr>
         <tr><td><b>1.14</b></td><td class="nowrap">29 Oct 2026</td><td>Today’s ₹ button renamed INF_ADJ ON / OFF; inflation set with −/+, a slider and 4–8% chips as well as typing; Youngster control panel compacted to two rows of four.</td></tr>
         <tr><td><b>1.13</b></td><td class="nowrap">29 Oct 2026</td><td>Inflation rate in the tab bar (default 6%); Today’s ₹ view that deflates every page and shows real returns; “Target in today’s money” goal switch saved with the user; Youngster horizons set on the cards with one control that moves all three; Youngster age from 0 (default 20); step-up 10% and SIP 10 years as defaults; presets renamed, 22 in all, with two inflation presets.</td></tr>
         <tr><td><b>1.12</b></td><td class="nowrap">29 Oct 2026</td><td>Presets menu (19 demonstrations in four groups) with a presenter note and Previous / Next; plan pages leave year-end records out while a preset is shown; Youngster lab lump sum, three chosen ages up to 100 and waiting steps of 3, 5 or 10 years; CAGR table rates 12–30% including 23% and 26%; phone layout fix for the waiting cards.</td></tr>
@@ -284,7 +285,7 @@ r_s' = b + c × spread        <span class="cm">so c × r_c' + s × r_s' = b exac
       <tbody>
         <tr><td>Revised projection</td><td>Schedule with all recorded years, plan after the latest one.</td></tr>
         <tr><td>Return needed from here</td><td>Bisect the blended return for the remaining years (recorded years fixed), −50% to 150%.</td></tr>
-        <tr><td>SIP needed, <b>scale</b> mode</td><td>Used while planned SIP remains. Multiply every future planned SIP by a factor <i>k</i> (keeping step-up and stop year) and bisect <i>k</i>. Shown as <i>k</i> × next year's planned SIP.</td></tr>
+        <tr><td>SIP needed, <b>scale</b> mode</td><td>Used while planned SIP remains (since 1.15 including the extra months of the last SIP year). Multiply every future planned SIP by a factor <i>k</i> (keeping step-up and stop year) and bisect <i>k</i>. Shown as <i>k</i> × next year's planned SIP.</td></tr>
         <tr><td>SIP needed, <b>restart</b> mode</td><td>Used when the planned SIP has ended. A flat monthly SIP from next year to the goal year, bisected.</td></tr>
         <tr><td>Revised goal year</td><td><code>yearReaching</code> on the revised rows.</td></tr>
       </tbody>
@@ -335,7 +336,7 @@ checkpoints[i] = { age, corpus, invested, multiple }   <span class="cm">null cor
       </tbody>
     </table></div>
     <h3>Database file</h3>
-    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.14",
+    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.15",
   "savedAt": "…", "users": { … }, "deleted": { "old.user": "2026-…" } }</div>
     <ul>
       <li>Created or opened with the File System Access API (Chromium browsers: Edge, Chrome).</li>
@@ -471,7 +472,7 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
     <p class="chapter-num">09</p>
     <h2>Testing</h2>
     <h3>Test pages</h3>
-    <p><code>test_runner.html</code> runs eight engine suites and must end with “ALL 8 TEST SUITES PASSED”:</p>
+    <p><code>test_runner.html</code> runs ten engine suites and must end with “ALL 10 TEST SUITES PASSED”:</p>
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Suite</th><th>Checks</th></tr></thead>
       <tbody>
@@ -483,6 +484,8 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
         <tr><td>F</td><td>Spouse impact with SIP off.</td></tr>
         <tr><td>G</td><td>Review with SIP off.</td></tr>
         <tr><td>H</td><td>Youngster with zero monthly.</td></tr>
+        <tr><td>I</td><td>0% return: Portfolio IRR exactly 0 and no doubling time (1.15).</td></tr>
+        <tr><td>J</td><td>Review after the last full SIP year with 6 extra months: planned SIP counted, <b>scale</b> mode (1.15).</td></tr>
       </tbody>
     </table></div>
     <p><code>test_milestones.html</code> prints Youngster checkpoints at 50, 60 and 70.</p>
@@ -527,7 +530,7 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
       <li>Wrap every storage access in try/catch; the app must work with storage blocked.</li>
       <li>Plain sentences on screen: say what happens and what to do.</li>
     </ul>
-    <footer class="manual-footer">Compounding Calculator v1.14 · 29 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
+    <footer class="manual-footer">Compounding Calculator v1.15 · 29 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
   </section>
 </article>
 </div>

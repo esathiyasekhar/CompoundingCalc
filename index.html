@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="app-version" content="1.14">
+  <meta name="app-version" content="1.15">
   <title>Compounding Calculator — Core + Satellite</title>
   <meta name="description" content="Core + Satellite compounding calculator: projected corpus, IRR, doubling milestones, spouse contributions, goal planning, annual course-correction and a youngster cost-of-delay lab.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.14">
+  <link rel="stylesheet" href="styles.css?v=1.15">
 </head>
 <body>
 
@@ -46,7 +46,7 @@
         </div>
         <div class="brand-titles">
           <h1>Compounding</h1>
-          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.14</span></button></div>
+          <div class="brand-subtitle">Core + Satellite wealth engine <button type="button" class="version-pill" id="btn-about" title="About this version">v<span data-app="version">1.15</span></button></div>
         </div>
       </div>
 
@@ -96,7 +96,7 @@
           <div>Investor: <strong id="print-user-name">Sekhar</strong></div>
           <div>Date: <strong id="print-report-date">—</strong></div>
           <div>Horizon: <strong id="print-report-horizon">30 Years</strong></div>
-          <div>Version <strong data-app="version">1.14</strong></div>
+          <div>Version <strong data-app="version">1.15</strong></div>
         </div>
       </div>
       <div class="print-assumptions" id="print-assumptions"></div>
@@ -252,7 +252,7 @@
                 </label>
               </div>
 
-              <div id="self-additions-container" class="fade-block">
+              <div id="self-additions-container" class="fade-block type-on">
                 <div class="form-group stepup-group" data-who="self">
                   <div class="form-label">
                     <span>Yearly step-up</span>
@@ -308,7 +308,7 @@
                 </label>
               </div>
 
-              <div id="spouse-inputs-container" class="fade-block is-off">
+              <div id="spouse-inputs-container" class="fade-block type-on is-off">
                 <div class="form-grid-2">
                   <div class="form-group">
                     <label class="form-label" for="inp-spouse-lump">Initial lump sum</label>
@@ -962,7 +962,7 @@
     </div>
 
     <footer class="app-footer">
-      Compounding Calculator v<span data-app="version">1.14</span> (<span data-app="date">29 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
+      Compounding Calculator v<span data-app="version">1.15</span> (<span data-app="date">29 Oct 2026</span>) · Developed by <span data-app="developer">Sathiya Sekhar E</span> · <span data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</span>. Projections, not promises — returns in real markets are uneven.
     </footer>
   </div>
 
@@ -1121,7 +1121,7 @@
         <button class="modal-close-btn" data-close="modal-about" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body about-body">
-        <div class="about-version">Version <strong data-app="version">1.14</strong> <span class="c-muted">· released <span data-app="date">29 Oct 2026</span></span></div>
+        <div class="about-version">Version <strong data-app="version">1.15</strong> <span class="c-muted">· released <span data-app="date">29 Oct 2026</span></span></div>
         <dl class="about-facts">
           <div><dt>Developed by</dt><dd data-app="developer">Sathiya Sekhar E</dd></div>
           <div><dt>For</dt><dd data-app="group">Warren Charlie Study group - TechnoFunda Top Guns</dd></div>
@@ -1181,7 +1181,7 @@
 
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <script src="calculator.js?v=1.14"></script>
-  <script src="app.js?v=1.14"></script>
+  <script src="calculator.js?v=1.15"></script>
+  <script src="app.js?v=1.15"></script>
 </body>
 </html>
