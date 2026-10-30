@@ -287,11 +287,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.17',
+    version: '1.18',
     date: '2026-10-30',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.18', date: '2026-10-30', notes: [
+        'Every slider has − and + beside it: a click moves one step (0.5% for returns, 5% for the split, 1 year for years); hold to keep stepping',
+        'The years, horizon and inflation − / + buttons repeat when held too'
+      ] },
       { version: '1.17', date: '2026-10-30', notes: [
         'Youngster lab starts at core 18% / satellite 25% (the ≈20% pair) instead of 17% / 27%',
         'The pots grow separately, so the default figures are lower: ₹24.01 Cr at 50, ₹189.88 Cr at 60, ₹1,591.63 Cr at 70'
@@ -1738,6 +1742,48 @@ document.addEventListener('DOMContentLoaded', function () {
   /**
    * Initialize Youngster Lab Event Listeners & Quick Chips
    */
+  // 1.18: − / + beside every slider. A click moves one step of the slider; holding the button keeps stepping.
+  function holdRepeat(btn, act, done) {
+    let t1 = null, t2 = null, on = false;
+    const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; if (on) { on = false; if (done) done(); } };
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || btn.disabled) return;
+      on = true; act(); t1 = setTimeout(() => { t2 = setInterval(act, 80); }, 400);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+    btn.addEventListener('click', (e) => { if (e.detail === 0) { act(); if (done) done(); } });   // Enter / Space
+  }
+
+  function nudgeRange(input, dir) {
+    if (!input || input.disabled) return;
+    const step = parseFloat(input.step) || 1, lo = parseFloat(input.min), hi = parseFloat(input.max), cur = parseFloat(input.value) || 0;
+    let v = Math.round(Math.round((cur + dir * step) / step) * step * 1000) / 1000;
+    if (!isNaN(lo)) v = Math.max(lo, v);
+    if (!isNaN(hi)) v = Math.min(hi, v);
+    if (v === cur) return;
+    input.value = v;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // Wrap each slider that has no − / + yet (the years and horizon sliders already have theirs)
+  function initSliderSteppers() {
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+      if (input.closest('.year-stepper')) return;
+      const name = (input.getAttribute('aria-label') || 'value').replace(/^./, c => c.toLowerCase());
+      const wrap = document.createElement('div');
+      wrap.className = 'year-stepper slider-stepper';
+      input.parentNode.insertBefore(wrap, input);
+      const btn = (dir) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'step-btn'; b.textContent = dir < 0 ? '−' : '+';
+        b.setAttribute('aria-label', `${dir < 0 ? 'Lower' : 'Raise'} ${name}`);
+        holdRepeat(b, () => nudgeRange(input, dir), () => input.dispatchEvent(new Event('change', { bubbles: true })));
+        return b;
+      };
+      wrap.append(btn(-1), input, btn(1));
+    });
+  }
+
   function initYoungsterLab() {
     const inputs = [
       els.inpYoungsterAge,
@@ -1754,15 +1800,12 @@ document.addEventListener('DOMContentLoaded', function () {
       els.inpYoungsterAddStopMonths
     ];
 
-    // −/+ buttons: move a years slider by exactly one year
-    document.querySelectorAll('.year-stepper .step-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const input = document.getElementById(this.getAttribute('data-target'));
-        if (!input) return;
-        const v = (parseInt(input.value, 10) || 1) + parseInt(this.getAttribute('data-delta'), 10);
-        input.value = Math.max(parseInt(input.min, 10) || 1, Math.min(parseInt(input.max, 10) || 60, v));
-        updateYoungsterLab();
-      });
+    // −/+ buttons: move a years slider by exactly one year (1.18: hold to keep stepping)
+    document.querySelectorAll('.year-stepper .step-btn[data-target]').forEach(btn => {
+      const input = document.getElementById(btn.getAttribute('data-target'));
+      if (!input) return;
+      holdRepeat(btn, () => nudgeRange(input, parseInt(btn.getAttribute('data-delta'), 10)),
+        () => input.dispatchEvent(new Event('change', { bubbles: true })));
     });
 
     inputs.forEach(input => {
@@ -1824,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const h = state.youngHz || [30, 40, 50];
       shiftAll((parseInt(els.inpYoungsterHz.value, 10) || 1) - h[0]);
     });
-    document.querySelectorAll('[data-hz-shift]').forEach(b => b.addEventListener('click', () => shiftAll(parseInt(b.getAttribute('data-hz-shift'), 10))));
+    document.querySelectorAll('[data-hz-shift]').forEach(b => holdRepeat(b, () => shiftAll(parseInt(b.getAttribute('data-hz-shift'), 10))));
     document.querySelectorAll('.hz-btn').forEach(b => b.addEventListener('click', () => {
       const i = parseInt(b.getAttribute('data-hz'), 10), d = parseInt(b.getAttribute('data-d'), 10);
       const age = intOr(els.inpYoungsterAge, 20), h = (state.youngHz || [30, 40, 50]).slice();
@@ -2322,7 +2365,7 @@ document.addEventListener('DOMContentLoaded', function () {
     els.inpInflation.addEventListener('change', () => { els.inpInflation.value = state.inflation; });
   }
   // Other ways to set the rate: −/+ in the tab bar, the slider and quick chips in the INF_ADJ strip and on the goal
-  document.querySelectorAll('[data-infl-step]').forEach(b => b.addEventListener('click', () =>
+  document.querySelectorAll('[data-infl-step]').forEach(b => holdRepeat(b, () =>
     setInflation(Number(state.inflation) + parseFloat(b.getAttribute('data-infl-step')))));
   document.querySelectorAll('[data-infl]').forEach(b => b.addEventListener('click', () => setInflation(parseFloat(b.getAttribute('data-infl')))));
   const inflSlider = document.getElementById('inp-inflation-slider');
@@ -3342,6 +3385,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Initial Startup
   initContributionsSwitcher();
+  initSliderSteppers();
   initYoungsterLab();
   populateProfileSelect();
   loadProfile(activeProfileId, false);

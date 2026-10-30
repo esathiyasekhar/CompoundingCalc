@@ -2,7 +2,7 @@
 
 Core + Satellite compounding calculator for the TechnoFunda method. Owner and developer: **Sathiya Sekhar E**.
 Live site: https://esathiyasekhar.github.io/CompoundingCalc/ (GitHub Pages, deploys from `main`, root folder).
-Current version: **1.17** (30 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
+Current version: **1.18** (30 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
 
 ## What it is
 
@@ -37,6 +37,7 @@ installer\build.ps1   # Windows (or installer/build.sh elsewhere): needs Go 1.21
 - Solvers bisect over the full schedule and keep the user's core–satellite gap (`ratesForBlended`). Every solved SIP/return must reproduce the target when put back.
 - Recorded year-end values (Annual review) replace the model for those years; while a preset note is shown, `planActuals()` returns no records.
 - Inflation: `realInflation` deflates values by `(1+i)^t` after the nominal loop (rows still add up; real IRR = (1+IRR)/(1+i) − 1 exactly). INF_ADJ view passes it for display; the goal switch “Target in today’s money” runs goal solvers in real terms. The Annual review is always nominal.
+- Sliders (1.18): `initSliderSteppers()` adds − / + around every `input[type=range]` not already in a `.year-stepper`; `holdRepeat()` (click = one step, hold repeats) and `nudgeRange()` (steps by the slider's own step / min / max, fires `input`, `change` on release). New sliders get the buttons automatically.
 - Youngster lab: own three sliders (core %, core CAGR, satellite CAGR), optional lump sum, three horizons in `state.youngHz` (years from now, up to age 100), age from 0.
 
 ## Reference figures (smoke-tested — if these change, something broke)
