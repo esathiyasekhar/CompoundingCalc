@@ -287,11 +287,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.16',
+    version: '1.17',
     date: '2026-10-30',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.17', date: '2026-10-30', notes: [
+        'Youngster lab starts at core 18% / satellite 25% (the ≈20% pair) instead of 17% / 27%',
+        'The pots grow separately, so the default figures are lower: ₹24.01 Cr at 50, ₹189.88 Cr at 60, ₹1,591.63 Cr at 70'
+      ] },
       { version: '1.16', date: '2026-10-30', notes: [
         'Presets follow the house core / satellite pairs: 26% = core 20% + satellite 40%, 18% = 15% + 25%, ≈20% = 18% + 25%',
         '“10X in 10 Yrs @26% 70:30 Split” now uses core 20% / satellite 40% (was 23% / 33%)',
@@ -1125,8 +1129,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const addMonths = additionsStopYears >= horizon ? 0 : Math.max(0, Math.min(11, intOr(els.inpYoungsterAddStopMonths, 0)));
     // Core / satellite selections on this tab (as in the Core engine)
     const yAlloc = Math.max(0, Math.min(100, numOr(els.inpYoungsterAlloc, 70)));
-    const yCore = numOr(els.inpYoungsterCoreRet, 17);
-    const ySat = numOr(els.inpYoungsterSatRet, 27);
+    const yCore = numOr(els.inpYoungsterCoreRet, 18);
+    const ySat = numOr(els.inpYoungsterSatRet, 25);
     const rate = (yAlloc * yCore + (100 - yAlloc) * ySat) / 100;   // blended CAGR, %
 
     if (els.dispYoungsterAge) els.dispYoungsterAge.textContent = `${currentAge} yrs`;
@@ -2006,7 +2010,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Reset page — restores the inputs of the page you are on, with Undo
   // Youngster lab starting values (also what Reset page restores)
-  const youngsterDefaults = { age: 20, lump: 0, monthly: 10000, enable: true, mode: 'pct', pct: 10, amt: 500, stop: 10, add: 10, addMonths: 0, alloc: 70, core: 17, sat: 27, hz: [30, 40, 50], wait: 3 };
+  const youngsterDefaults = { age: 20, lump: 0, monthly: 10000, enable: true, mode: 'pct', pct: 10, amt: 500, stop: 10, add: 10, addMonths: 0, alloc: 70, core: 18, sat: 25, hz: [30, 40, 50], wait: 3 };
   function readYoungsterInputs() {
     return {
       age: els.inpYoungsterAge.value, monthly: els.inpYoungsterMonthly.value,

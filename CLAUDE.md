@@ -2,7 +2,7 @@
 
 Core + Satellite compounding calculator for the TechnoFunda method. Owner and developer: **Sathiya Sekhar E**.
 Live site: https://esathiyasekhar.github.io/CompoundingCalc/ (GitHub Pages, deploys from `main`, root folder).
-Current version: **1.16** (30 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
+Current version: **1.17** (30 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
 
 ## What it is
 
@@ -41,13 +41,13 @@ installer\build.ps1   # Windows (or installer/build.sh elsewhere): needs Go 1.21
 
 ## Reference figures (smoke-tested — if these change, something broke)
 
-Standard plan (₹1 L + ₹10,000/month, 10% step-up to year 10, SIP 10 yrs, 70/30 at 15%/25%, 30 yrs): **₹22.91 Cr**, invested ₹20.12 L, IRR **20.51%**, blended 18.00%. With INF_ADJ at 6%: ₹3.99 Cr, real IRR 13.69%. Youngster defaults (age 20): ₹30.49 Cr at 50, ₹292.12 Cr at 60, ₹2,993.09 Cr at 70. Slide checks: ₹1 L at 26% for 10 yrs = ₹10.09 L (70 : 30 at 20% / 40% = ₹13.01 L, IRR 29.25%); family Models A–D at year 20 = ₹36.27 / 67.05 / 107.80 / 363.84 Cr.
+Standard plan (₹1 L + ₹10,000/month, 10% step-up to year 10, SIP 10 yrs, 70/30 at 15%/25%, 30 yrs): **₹22.91 Cr**, invested ₹20.12 L, IRR **20.51%**, blended 18.00%. With INF_ADJ at 6%: ₹3.99 Cr, real IRR 13.69%. Youngster defaults (age 20, 70 : 30 at 18% / 25%): ₹24.01 Cr at 50, ₹189.88 Cr at 60, ₹1,591.63 Cr at 70. Slide checks: ₹1 L at 26% for 10 yrs = ₹10.09 L (70 : 30 at 20% / 40% = ₹13.01 L, IRR 29.25%); family Models A–D at year 20 = ₹36.27 / 67.05 / 107.80 / 363.84 Cr.
 
 ## Owner's preferences
 
 - Indian number format everywhere (`formatINR`: lakh/crore grouping, compact L / Cr). ₹ symbol.
 - Plain, short on-screen wording that says what happens. Colours only from CSS tokens (gold = money/horizon, growth green, core periwinkle, satellite teal, rose = loss).
-- Defaults: Core engine ₹1,00,000 lump + ₹10,000 SIP, step-up ON 10%, last step-up year 10, SIP 10 yrs, 70/30, 15%/25%, 30 yrs, spouse off. Youngster: age 20, ₹10,000, step-up 10% for 10 yrs, SIP 10 yrs, 70%/17%/27%, horizons 30/40/50. Inflation 6%, INF_ADJ off. Reset page restores these.
+- Defaults: Core engine ₹1,00,000 lump + ₹10,000 SIP, step-up ON 10%, last step-up year 10, SIP 10 yrs, 70/30, 15%/25%, 30 yrs, spouse off. Youngster: age 20, ₹10,000, step-up 10% for 10 yrs, SIP 10 yrs, 70%/18%/25% (the ≈20% pair, as in the presets), horizons 30/40/50. Inflation 6%, INF_ADJ off. Reset page restores these.
 - Header quote: Einstein line on one line in gold, “— Albert Einstein” (no “attributed to”).
 - Credits: “Developed by Sathiya Sekhar E”. The group name “Warren Charlie Study group - TechnoFunda Top Guns” appears in About and the footer only — **not** in printed reports or the manuals.
 - Every change is a new version with a history note; the owner sees the version pill (v1.xx).

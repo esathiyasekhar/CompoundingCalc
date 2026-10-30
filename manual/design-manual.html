@@ -7,15 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="manual.css?v=1.16">
-<script src="manual.js?v=1.16"></script>
+<link rel="stylesheet" href="manual.css?v=1.17">
+<script src="manual.js?v=1.17"></script>
 </head>
 <body>
 <div class="manual">
 
 <nav class="toc" aria-label="Contents">
   <p class="toc-title">Design manual</p>
-  <p class="toc-sub">Compounding Calculator v1.16</p>
+  <p class="toc-sub">Compounding Calculator v1.17</p>
   <ol>
     <li><a href="#purpose">Purpose and principles</a></li>
     <li><a href="#architecture">Architecture</a></li>
@@ -53,7 +53,7 @@
     <h1>Compounding <span>Calculator</span></h1>
     <p class="cover-lede">How the calculator is built: the files, every formula and solver, the data model, the visual system, the Windows installer and the web edition.</p>
     <ul class="cover-meta">
-      <li>Version <strong>1.16</strong></li>
+      <li>Version <strong>1.17</strong></li>
       <li>Released <strong>29 Oct 2026</strong></li>
       <li>Developed by <strong>Sathiya Sekhar E</strong></li>
     </ul>
@@ -93,6 +93,7 @@
     <div class="table-wrap"><table class="plain">
       <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
       <tbody>
+        <tr><td><b>1.17</b></td><td class="nowrap">30 Oct 2026</td><td>The Youngster lab starts at core 18% / satellite 25% (the ≈20% pair used by the presets) instead of 17% / 27%. The pots grow separately, so the default figures fall to ₹24.01 Cr at 50, ₹189.88 Cr at 60 and ₹1,591.63 Cr at 70 (were ₹30.49 / ₹292.12 / ₹2,993.09 Cr).</td></tr>
         <tr><td><b>1.16</b></td><td class="nowrap">30 Oct 2026</td><td>Presets follow the house core / satellite pairs at 70 : 30: 26% = core 20% + satellite 40%, 18% = 15% + 25%, ≈20% = 18% + 25%. “10X in 10 Yrs @26% 70:30 Split” moves from 23% / 33% to 20% / 40% (₹13.01 L, IRR 29.25%); the family models A–D show their blended CAGR in the title and note.</td></tr>
         <tr><td><b>1.15</b></td><td class="nowrap">29 Oct 2026</td><td>Fixes from the Finance Hub planner: faded Self SIP and Spouse boxes stay editable and typing an amount switches them on; Portfolio IRR exactly 0 at a 0% return (shown as —, no doubling time); the Annual review counts a last SIP year with extra months as planned SIP. Two new engine suites (I, J).</td></tr>
         <tr><td><b>1.14</b></td><td class="nowrap">29 Oct 2026</td><td>Today’s ₹ button renamed INF_ADJ ON / OFF; inflation set with −/+, a slider and 4–8% chips as well as typing; Youngster control panel compacted to two rows of four.</td></tr>
@@ -337,7 +338,7 @@ checkpoints[i] = { age, corpus, invested, multiple }   <span class="cm">null cor
       </tbody>
     </table></div>
     <h3>Database file</h3>
-    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.16",
+    <div class="formula">{ "app": "Compounding Calculator", "format": 2, "appVersion": "1.17",
   "savedAt": "…", "users": { … }, "deleted": { "old.user": "2026-…" } }</div>
     <ul>
       <li>Created or opened with the File System Access API (Chromium browsers: Edge, Chrome).</li>
@@ -352,7 +353,7 @@ checkpoints[i] = { age, corpus, invested, multiple }   <span class="cm">null cor
       <tbody>
         <tr><td>Core engine and new users</td><td>₹1,00,000 lump, ₹10,000 SIP, step-up on 10% (₹1,000 in ₹ mode), last step-up year 10, SIP 10 yrs 0 months, 70/30, 15% / 25%, horizon 30, spouse off.</td></tr>
         <tr><td>Goal</td><td>₹10 Cr in 20 years, assumed return = plan's blended CAGR.</td></tr>
-        <tr><td>Youngster lab</td><td>Age 20 (range 0–55), no lump sum, ₹10,000, step-up 10% (₹500 in ₹ mode), stop step-up 10, stop SIP 10 yrs 0 months, 70% / 17% / 27%, horizons 30 / 40 / 50 years, waiting steps of 3 years.</td></tr>
+        <tr><td>Youngster lab</td><td>Age 20 (range 0–55), no lump sum, ₹10,000, step-up 10% (₹500 in ₹ mode), stop step-up 10, stop SIP 10 yrs 0 months, 70% / 18% / 25%, horizons 30 / 40 / 50 years, waiting steps of 3 years.</td></tr>
         <tr><td>Inflation</td><td>6% a year; INF_ADJ view (today’s rupees) off; goal “Target in today’s money” off.</td></tr>
       </tbody>
     </table></div>
@@ -531,7 +532,7 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H wi
       <li>Wrap every storage access in try/catch; the app must work with storage blocked.</li>
       <li>Plain sentences on screen: say what happens and what to do.</li>
     </ul>
-    <footer class="manual-footer">Compounding Calculator v1.16 · 30 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
+    <footer class="manual-footer">Compounding Calculator v1.17 · 30 Oct 2026 · Developed by Sathiya Sekhar E.</footer>
   </section>
 </article>
 </div>
