@@ -287,11 +287,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---------- Version control: single source of truth for version and credits ----------
   const APP_INFO = {
-    version: '1.15',
-    date: '2026-10-29',
+    version: '1.16',
+    date: '2026-10-30',
     developer: 'Sathiya Sekhar E',
     group: 'Warren Charlie Study group - TechnoFunda Top Guns',
     history: [
+      { version: '1.16', date: '2026-10-30', notes: [
+        'Presets follow the house core / satellite pairs: 26% = core 20% + satellite 40%, 18% = 15% + 25%, ≈20% = 18% + 25%',
+        '“10X in 10 Yrs @26% 70:30 Split” now uses core 20% / satellite 40% (was 23% / 33%)',
+        'The family models A–D show their blended CAGR'
+      ] },
       { version: '1.15', date: '2026-10-29', notes: [
         'Spouse and SIP boxes can be typed in while switched off; typing an amount switches them on',
         'A 0% return shows the Portfolio IRR and doubling time as —, never “0.00%” or an endless doubling time',
@@ -2087,21 +2092,26 @@ document.addEventListener('DOMContentLoaded', function () {
     spouseInclude: false, spouseStepUpOn: false
   }, o);
   const youngPreset = (o) => Object.assign({}, youngsterDefaults, { lump: 0, enable: false, add: 999, stop: 10, alloc: 100, core: 18, sat: 25, hz: [30, 40, 50], wait: 3 }, o);
+  // 1.16: blended CAGR in the title (70 : 30) — 26% = 20 / 40, 18% = 15 / 25, ≈20% = 18 / 25
+  const blendText = (c, s) => {
+    const b = Math.round((0.7 * c + 0.3 * s) * 10) / 10;
+    return b % 1 === 0 ? `${b}%` : Math.abs(b - Math.round(b)) < 0.2 ? `≈${Math.round(b)}%` : `${b}%`;
+  };
   const familyModel = (name, c, s) => ({
-    id: 'family-' + name.toLowerCase(), title: `Model ${name} · core ${c}% / satellite ${s}%`,
+    id: 'family-' + name.toLowerCase(), title: `Model ${name} · core ${c}% / satellite ${s}% · ${blendText(c, s)} blended`,
     sub: '₹1 Cr at 40 + ₹80,000 a month, 70 : 30, to 60', tab: 'tab-core',
     core: corePreset({ coreAlloc: 70, coreRet: c, satRet: s, horizon: 20, selfLump: 10000000, selfInclude: true, selfMonthly: 80000, selfAddStop: 20, selfStepUpStop: 20 }),
-    note: `₹1 Cr at age 40 (₹70 L core, ₹30 L satellite) plus the ₹80,000 monthly surplus (₹56,000 core, ₹24,000 satellite) for 20 years, to age 60. Core ${c}%, satellite ${s}%. Compare the corpus, the IRR and how much of it the satellite makes.`
+    note: `₹1 Cr at age 40 (₹70 L core, ₹30 L satellite) plus the ₹80,000 monthly surplus (₹56,000 core, ₹24,000 satellite) for 20 years, to age 60. Core ${c}%, satellite ${s}% (${blendText(c, s)} blended CAGR). Compare the corpus, the IRR and how much of it the satellite makes.`
   });
 
   const PRESET_GROUPS = [
     { title: 'Core engine', hint: 'Slide 11', items: [
       { id: 'tenx', title: '10X in 10 Yrs @26%', sub: '₹1 L lump sum, all in core, no SIP, 10 years', tab: 'tab-core',
-        core: corePreset({ coreAlloc: 100, coreRet: 26, satRet: 33, horizon: 10, selfLump: 100000 }),
+        core: corePreset({ coreAlloc: 100, coreRet: 26, satRet: 40, horizon: 10, selfLump: 100000 }),
         note: '₹1 lakh compounding at 26% a year. By the Rule of 72 it doubles about every 2.8 years, so it is near 10× by year 10. Hover over year 5 to see what selling halfway would leave behind.' },
-      { id: 'tenx-7030', title: '10X in 10 Yrs @26% 70:30 Split', sub: 'Core 23% + satellite 33% = 26% blended', tab: 'tab-core',
-        core: corePreset({ coreAlloc: 70, coreRet: 23, satRet: 33, horizon: 10, selfLump: 100000 }),
-        note: 'Same ₹1 lakh and the same 26% blended CAGR, split 70 : 30 with a 10-point gap. The satellite is never rebalanced, so it becomes a bigger share and the end value beats plain 26%. Compare the corpus and the Portfolio IRR with the previous preset.' },
+      { id: 'tenx-7030', title: '10X in 10 Yrs @26% 70:30 Split', sub: 'Core 20% + satellite 40% = 26% blended', tab: 'tab-core',
+        core: corePreset({ coreAlloc: 70, coreRet: 20, satRet: 40, horizon: 10, selfLump: 100000 }),
+        note: 'Same ₹1 lakh and the same 26% blended CAGR, split 70 : 30 as core 20% and satellite 40%. The satellite is never rebalanced, so it becomes a bigger share and the end value beats plain 26%. Compare the corpus and the Portfolio IRR with the previous preset.' },
       { id: 'sip18', title: '₹10,000 monthly SIP @18%', sub: 'All in core, no step-up, SIP for 10 years', tab: 'tab-core',
         core: corePreset({ coreAlloc: 100, coreRet: 18, satRet: 25, horizon: 10, selfLump: 0, selfInclude: true, selfMonthly: 10000, selfAddStop: 10 }),
         note: '₹10,000 every month for 10 years at 18%, with no step-up and no lump sum. Compare what went in with what compounding added.' },

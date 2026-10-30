@@ -2,7 +2,7 @@
 
 Core + Satellite compounding calculator for the TechnoFunda method. Owner and developer: **Sathiya Sekhar E**.
 Live site: https://esathiyasekhar.github.io/CompoundingCalc/ (GitHub Pages, deploys from `main`, root folder).
-Current version: **1.15** (29 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
+Current version: **1.16** (30 Oct 2026). Full detail is in `manual/design-manual.html` (architecture, every formula, data model, visual system); read the relevant chapter before changing an area.
 
 ## What it is
 
@@ -41,7 +41,7 @@ installer\build.ps1   # Windows (or installer/build.sh elsewhere): needs Go 1.21
 
 ## Reference figures (smoke-tested — if these change, something broke)
 
-Standard plan (₹1 L + ₹10,000/month, 10% step-up to year 10, SIP 10 yrs, 70/30 at 15%/25%, 30 yrs): **₹22.91 Cr**, invested ₹20.12 L, IRR **20.51%**, blended 18.00%. With INF_ADJ at 6%: ₹3.99 Cr, real IRR 13.69%. Youngster defaults (age 20): ₹30.49 Cr at 50, ₹292.12 Cr at 60, ₹2,993.09 Cr at 70. Slide checks: ₹1 L at 26% for 10 yrs = ₹10.09 L; family Models A–D at year 20 = ₹36.27 / 67.05 / 107.80 / 363.84 Cr.
+Standard plan (₹1 L + ₹10,000/month, 10% step-up to year 10, SIP 10 yrs, 70/30 at 15%/25%, 30 yrs): **₹22.91 Cr**, invested ₹20.12 L, IRR **20.51%**, blended 18.00%. With INF_ADJ at 6%: ₹3.99 Cr, real IRR 13.69%. Youngster defaults (age 20): ₹30.49 Cr at 50, ₹292.12 Cr at 60, ₹2,993.09 Cr at 70. Slide checks: ₹1 L at 26% for 10 yrs = ₹10.09 L (70 : 30 at 20% / 40% = ₹13.01 L, IRR 29.25%); family Models A–D at year 20 = ₹36.27 / 67.05 / 107.80 / 363.84 Cr.
 
 ## Owner's preferences
 

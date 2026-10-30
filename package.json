@@ -1,6 +1,6 @@
 {
   "name": "compounding-calculator",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "private": true,
   "description": "Core + Satellite Compounding Calculator — plain HTML/CSS/JS, no build step",
   "scripts": {
